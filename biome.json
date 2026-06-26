@@ -12,6 +12,7 @@
   "files": {
     "ignoreUnknown": true,
     "includes": [
+      "src/**",
       "*.json",
       "!package-lock.json",
       "webpack.config.js"
