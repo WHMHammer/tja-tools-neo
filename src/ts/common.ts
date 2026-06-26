@@ -20,8 +20,8 @@ export function addZero(notes, max) {
   const rate = Math.trunc(max / notes.nDivisions);
   if (rate > 1) {
     notes.nDivisions *= rate;
-    for (let i = 0; i < notes.length; ++i) {
-      notes[i].position *= rate;
+    for (const note of notes) {
+      note.position *= rate;
     }
   }
 }

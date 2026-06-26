@@ -1,5 +1,7 @@
 // @ts-nocheck
 
+import { SPRITES } from './sprite/sprite';
+
 let sprites;
 
 export function drawLine(
@@ -239,25 +241,27 @@ export function drawSprite(
 ) {
   const sprite = sprites[type][key];
   switch (alignY) {
-    default:
-    case 'top':
-      break;
     case 'center':
       y -= sprite.naturalHeight / 2;
       break;
     case 'bottom':
       y -= sprite.naturalHeight;
       break;
+    // biome-ignore lint/complexity/noUselessSwitchCase: to make the logic clear
+    case 'top':
+    default:
+      break;
   }
   switch (alignX) {
-    default:
-    case 'left':
-      break;
     case 'center':
       x -= sprite.naturalWidth / 2;
       break;
     case 'right':
       x -= sprite.naturalWidth;
+      break;
+    // biome-ignore lint/complexity/noUselessSwitchCase: to make the logic clear
+    case 'left':
+    default:
       break;
   }
   ctx.drawImage(sprite, x, y);
@@ -272,7 +276,7 @@ export function drawImageText(ctx, x, y, text, type) {
 
 export function initSprites() {
   return new Promise((resolve) => {
-    const data = require('./sprite/sprite.ts').default;
+    const data = SPRITES;
     const outdata = {};
     let total = 0;
 

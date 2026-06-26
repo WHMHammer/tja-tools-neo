@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-export default {
+export const SPRITES = {
   'notes': {
     'adlib': require('./notes-adlib.png').default,
     'bomb': require('./notes-bomb.png').default,

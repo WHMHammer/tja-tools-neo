@@ -45,8 +45,7 @@ export function convertToDonscore(chart, courseId) {
 
   // Align to 48th
   const newData = [];
-  for (let i = 0; i < course.measures.length; i++) {
-    const measure = course.measures[i];
+  for (const measure of course.measures) {
     const tempData = {
       'N': null,
       'E': null,
@@ -78,17 +77,15 @@ export function convertToDonscore(chart, courseId) {
 
   // Add for Roll
   for (const bt of branchTypes) {
-    for (let i = 0; i < newData.length; i++) {
-      if (newData[i][bt] === null) {
+    for (const data of newData) {
+      if (data[bt] === null) {
         continue;
       }
       let rolling = false;
       const marginDiff = [];
       let margin = -1;
       let index = -1;
-      for (let j = 0; j < newData[i][bt].length; j++) {
-        const note = newData[i][bt][j];
-
+      for (const note of data[bt]) {
         if (isRollType(note.type)) {
           index = note.position;
           rolling = true;
@@ -105,13 +102,13 @@ export function convertToDonscore(chart, courseId) {
       }
 
       if (rolling) {
-        marginDiff.push(margin - (newData[i][bt].nDivisions - index - 1)); // `[@5` - (between `[` & line end)
+        marginDiff.push(margin - (data[bt].nDivisions - index - 1)); // `[@5` - (between `[` & line end)
       }
 
       if (marginDiff.length > 0) {
         const marginMax = marginDiff.reduce(aryMax);
         if (marginMax > 0) {
-          addZero(newData[i][bt], newData[i][bt].nDivisions * (marginMax + 1));
+          addZero(data[bt], data[bt].nDivisions * (marginMax + 1));
         }
       }
     }
@@ -143,9 +140,9 @@ export function convertToDonscore(chart, courseId) {
     }
     const fixedMax = arrayLCM(lengths);
 
-    for (let j = 0; j < newEvent[i].length; j++) {
+    for (const event of newEvent[i]) {
       const rate = fixedMax / measure.nDivisions;
-      newEvent[i][j].position *= rate;
+      event.position *= rate;
     }
 
     for (const bt of branchTypes) {
@@ -157,7 +154,7 @@ export function convertToDonscore(chart, courseId) {
 
   // Convert Notes
   const converted = [];
-  for (let i = 0; i < newData.length; i++) {
+  for (const _ of newData) {
     converted.push({
       'N': null,
       'E': null,
@@ -190,8 +187,7 @@ export function convertToDonscore(chart, courseId) {
           });
         }
 
-        for (let j = 0; j < notes.length; ++j) {
-          const note = notes[j];
+        for (const note of notes) {
           let balloonCount = 0;
           if (isRollType(note.type)) {
             rolling = true;
@@ -398,11 +394,10 @@ export function convertToDonscore(chart, courseId) {
     }
 
     // Events
-    for (let i = 0; i < newEvent[m].length; i++) {
-      if (isNaN(newEvent[m][i].position)) {
+    for (const event of newEvent[m]) {
+      if (isNaN(event.position)) {
         continue;
       }
-      const event = newEvent[m][i];
       const fixedMeasure = lcm(Math.abs(measure.length[1]), 4);
       const fixedPosition =
         event.position * (fixedMeasure / Math.abs(measure.length[1]));
@@ -455,12 +450,11 @@ export function convertToDonscore(chart, courseId) {
               continue;
             }
             if (valueLookup[event.value[bt]] === undefined) {
-              scrollsTemp.push(
-                (valueLookup[event.value[bt]] = {
-                  value: event.value[bt],
-                  branch: [],
-                }),
-              );
+              valueLookup[event.value[bt]] = {
+                value: event.value[bt],
+                branch: [],
+              };
+              scrollsTemp.push(valueLookup[event.value[bt]]);
             }
             valueLookup[event.value[bt]].branch.push(bt);
           }

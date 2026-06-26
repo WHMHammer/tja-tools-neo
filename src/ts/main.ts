@@ -8,13 +8,13 @@ import html2canvas from 'html2canvas';
 import iconv from 'iconv-lite';
 import JsZip from 'jszip';
 import $ from 'umbrellajs';
-import analyseChart, { calculateScore, predictScore } from './analyseChart';
+import { analyseChart, calculateScore, predictScore } from './analyseChart';
 import { convertToDonscore } from './donscore';
-import drawChart, { initUsedSprite } from './drawChart';
+import { drawChart, initUsedSprite } from './drawChart';
 import { embedText, optimizePNG } from './embedChart';
 import { loadAllFonts } from './font/font';
 import { difficultyTypeToString, i18n, setLanguage, t } from './i18n';
-import parseTja, { getCourseLines, getEnabledBranch } from './parseTJA';
+import { getCourseLines, getEnabledBranch, parseTja } from './parseTJA';
 
 import '../css/style.scss';
 import '../css/font/Pixel-3x5.css';
@@ -48,7 +48,7 @@ let selectedScoreSystem = 'CS';
 let selectedGogoFloor = 'AC15';
 let selectedCalcMode = 'fromFile';
 
-const downloadNewUniqueId = async () => {
+const downloadNewUniqueId = () => {
   if (tjaParsed === null) {
     alert('Please select a chart');
     return;
@@ -289,7 +289,8 @@ async function showPreview() {
   $previewImg.src = '';
 
   try {
-    const $canvas = ($previewCanvas = drawChart(tjaParsed, selectedDifficulty));
+    $previewCanvas = drawChart(tjaParsed, selectedDifficulty);
+    const $canvas = $previewCanvas;
     $canvas.id = 'tja-preview';
     $('.page-preview').append($canvas);
 
@@ -409,9 +410,7 @@ function buildStatisticsPage(data) {
 
   $('.stat-level').text('★×' + course.headers.level);
 
-  let statPotential;
-  let statPotential2;
-  statPotential = calculateScore(
+  const statPotential = calculateScore(
     stats,
     course,
     scoreInit,
@@ -420,6 +419,7 @@ function buildStatisticsPage(data) {
     'AC15',
     false,
   )[0];
+  let statPotential2;
   if (selectedScoreSystem === 'CS') {
     statPotential2 = calculateScore(
       stats,
@@ -455,10 +455,10 @@ function buildStatisticsPage(data) {
   let bpmMin = 0;
   let bpmMax = 0;
   let firstBpm = true;
-  for (let i = 0; i < course.measures.length; i++) {
-    for (let j = 0; j < course.measures[i].events.length; j++) {
-      if (course.measures[i].events[j].name === 'bpm') {
-        const curBpm = Number.parseFloat(course.measures[i].events[j].value);
+  for (const measure of course.measures) {
+    for (const event of measure.events) {
+      if (event.name === 'bpm') {
+        const curBpm = Number.parseFloat(event.value);
 
         if (firstBpm) {
           bpmMin = curBpm;
@@ -675,7 +675,7 @@ function copyRendaText(rendas, rendaExtends, rendaLength) {
 //==============================================================================
 
 const downloadButton = document.getElementById('download_button');
-downloadButton.addEventListener('click', async () => {
+downloadButton.addEventListener('click', () => {
   const txt = document.getElementById('textarea').value;
   const title =
     (tjaParsed === null ? null : tjaParsed.headers.title) || 'untitled';
@@ -827,7 +827,7 @@ $('.controls-locale input[name=locale]').on('click', (evt) => {
 });
 
 // Listen for postMessage events from other websites
-window.addEventListener('message', async (event) => {
+window.addEventListener('message', (event) => {
   // Validate origin for security (optional - adjust as needed)
   // if (event.origin !== 'https://trusted-domain.com') {
   //     return;

@@ -23,10 +23,10 @@
                         <select id="zip-tja-select" class="zip-tja-select">
                             <option value="">-- Select a TJA file --</option>
                         </select>
-                        <button id="load-zip-tja" class="load-zip-tja" data-i18n="editor.zip.load">
+                        <button id="load-zip-tja" class="load-zip-tja" type="button" data-i18n="editor.zip.load">
                             Load Selected
                         </button>
-                        <button id="cancel-zip" class="cancel-zip" data-i18n="editor.zip.cancel">
+                        <button id="cancel-zip" class="cancel-zip" type="button" data-i18n="editor.zip.cancel">
                             Cancel
                         </button>
                     </div>
@@ -39,10 +39,10 @@
                         <label><input id="charset-gb18030" type="radio" name="charset">GB18030</label>
                     </div>
                     <div style="float:right">
-                        <button id="download_button" data-i18n="editor.download">Download</button>
-                        <button id="copy_button" data-i18n="editor.copy">Copy</button>
+                        <button id="download_button" type="button" data-i18n="editor.download">Download</button>
+                        <button id="copy_button" type="button" data-i18n="editor.copy">Copy</button>
                         <label><input id="editor-live" type="checkbox" checked><span data-i18n="editor.live">Live-editing</span></label>
-                        <button class="editor-process" data-i18n="editor.process">Process</button>
+                        <button class="editor-process" type="button" data-i18n="editor.process">Process</button>
                     </div>
                 </div>
                 <div class="content">
@@ -149,7 +149,7 @@
                     </p>
 					<div class="renda-head">
                         <h4 data-i18n="stats.drumrolls">Drumrolls</h4>
-                        <button class="renda-text-copy" data-i18n="stats.copy">Copy (Japanese)</button>
+                        <button class="renda-text-copy" type="button" data-i18n="stats.copy">Copy (Japanese)</button>
 					</div>
                     <p>
                         <code class="stat-renda"></code> = <code class="stat-renda-total"></code>
@@ -157,13 +157,13 @@
                     <h4 data-i18n="stats.balloons">Balloons</h4>
                     <p><code class="stat-balloon"></code></p>
                     <h3 data-i18n="stats.graph">Density Graph</h3>
-                    <div class="stat-graph-container"><svg class="stat-graph"></svg></div>
+                    <div class="stat-graph-container"><svg class="stat-graph"><title>Density Graph</title></svg></div>
                 </div>
             </div>
         </section>
         <div class="area area-footer">
             <a class="source-repo" href="https://github.com/WHMHammer/tja-tools" target="_blank"><!-- default URL to replace in GitHub action. Please keep this URL the same as the URL in the GitHub action -->
-                <img src="https://github.githubassets.com/pinned-octocat.svg">
+                <img src="https://github.githubassets.com/pinned-octocat.svg" alt="GitHub Icon">
                 <label data-i18n="footer.source">Source Repo</label>
             </a>
             <hr />

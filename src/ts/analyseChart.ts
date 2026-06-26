@@ -54,9 +54,8 @@ function convertToTimed(course, branchType) {
   // Get Branch Data
   const newData = [];
 
-  for (let i = 0; i < course.measures.length; i++) {
+  for (const measure of course.measures) {
     let selData = '';
-    const measure = course.measures[i];
 
     switch (branchType) {
       case 'N':
@@ -95,8 +94,7 @@ function convertToTimed(course, branchType) {
     const measure = course.measures[m];
     const length = (measure.length[0] / measure.length[1]) * 4;
 
-    for (let e = 0; e < measure.events.length; e++) {
-      const event = measure.events[e];
+    for (const event of measure.events) {
       const eBeat = (length / measure.nDivisions) * event.position;
 
       switch (event.name) {
@@ -118,8 +116,7 @@ function convertToTimed(course, branchType) {
 
     // Analyze Notes
     midxToNoteIdx[m] = notes.length;
-    for (let d = 0; d < newData[m].length; d++) {
-      const note = newData[m][d];
+    for (const note of newData[m]) {
       const nBeat = (length / newData[m].nDivisions) * note.position;
 
       if (note.type) {
@@ -385,9 +382,7 @@ function getGraph(course) {
     'kadon',
   ];
 
-  for (let i = 0; i < course.notes.length; i++) {
-    const note = course.notes[i];
-
+  for (const note of course.notes) {
     const v1 = typeNote.indexOf(note.type);
     if (v1 !== -1) {
       while ((data.length + 1) * timeframe <= note.time) {
@@ -430,7 +425,7 @@ function getGraph(course) {
   };
 }
 
-export default function (chart, courseId, branchType) {
+export function analyseChart(chart, courseId, branchType) {
   const course = chart.courses[courseId];
   const converted = convertToTimed(course, branchType);
 
@@ -565,8 +560,8 @@ export function calculateScore(
         + stats.score.balloonPop[1] * 100;
 
       let scoreRoll = 0;
-      for (let i = 0; i < stats.rendas.length; i++) {
-        scoreRoll += Math.ceil(Math.max(0, stats.rendas[i]) / rollAc16) * 100;
+      for (const renda of stats.rendas) {
+        scoreRoll += Math.ceil(Math.max(0, renda) / rollAc16) * 100;
       }
       return [
         scoreBasic,

@@ -56,13 +56,17 @@ function insertChunk(chunks, index, type, data) {
 }
 
 function calculateCrc(chunkData) {
+  // biome-ignore lint/suspicious/noBitwiseOperators: calculate CRC
   let crc = -1 >>> 0;
-  for (let i = 0; i < chunkData.length; i++) {
-    crc ^= chunkData[i];
+  for (const chunk of chunkData) {
+    // biome-ignore lint/suspicious/noBitwiseOperators: calculate CRC
+    crc ^= chunk;
     for (let j = 0; j < 8; j++) {
+      // biome-ignore lint/suspicious/noBitwiseOperators: calculate CRC
       crc = crc & 1 ? (crc >>> 1) ^ 0xed_b8_83_20 : crc >>> 1;
     }
   }
+  // biome-ignore lint/suspicious/noBitwiseOperators: calculate CRC
   return (crc ^ -1) >>> 0;
 }
 

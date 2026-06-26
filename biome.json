@@ -35,17 +35,38 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "complexity": "error",
+      "a11y": "error",
+      "complexity": {
+        "recommended": true
+      },
       "correctness": "error",
       "nursery": {
         "useExplicitReturnType": "error",
         "useExplicitType": "error"
       },
-      "performance": "error",
+      "performance": {
+        "recommended": true,
+        "useTopLevelRegex": "warn"
+      },
       "recommended": true,
-      "security": "error",
-      "style": "error",
-      "suspicious": "error"
+      "security": {
+        "recommended": true
+      },
+      "style": {
+        "noCommonJs": "warn",
+        "noDefaultExport": "warn",
+        "noNestedTernary": "info",
+        "noSubstr": "info",
+        "recommended": true,
+        "useForOf": "info",
+        "useNamingConvention": "info"
+      },
+      "suspicious": {
+        "noBitwiseOperators": "info",
+        "noEvolvingTypes": "warn",
+        "recommended": true,
+        "useAwait": "warn"
+      }
     }
   },
   "vcs": {

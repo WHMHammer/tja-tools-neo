@@ -274,7 +274,8 @@ function parseLine(line) {
   }
 
   // header
-  if ((match = line.match(/^(\.?[A-Z0-9_]+):(.*)/i))) {
+  match = line.match(/^(\.?[A-Z0-9_]+):(.*)/i);
+  if (match) {
     // . for simulator-exclusive headers, _ for i18n headers
     const nameUpper = match[1].toUpperCase();
     const value = match[2];
@@ -288,7 +289,8 @@ function parseLine(line) {
     };
   }
   // command
-  if ((match = line.match(/^#([A-Z]+)\s?(.*)/i))) {
+  match = line.match(/^#([A-Z]+)\s?(.*)/i);
+  if (match) {
     // missing space is recognized in TaikoJiro
     const nameUpper = match[1].toUpperCase();
     const value = match[2];
@@ -729,11 +731,11 @@ function getCourse(tjaHeaders, lines) {
               break;
 
             case 'MOVEEVENT':
-              addEvent('moveEvent', Number.parseInt(line.value));
+              addEvent('moveEvent', Number.parseInt(line.value, 10));
               break;
 
             case 'COUNTCHANGE':
-              addEvent('countChange', Number.parseInt(line.value));
+              addEvent('countChange', Number.parseInt(line.value, 10));
               break;
 
             case 'AVOIDTEXTON':
@@ -753,7 +755,7 @@ function getCourse(tjaHeaders, lines) {
               break;
 
             case 'MOVELINE':
-              addEvent('moveLine', Number.parseInt(line.value));
+              addEvent('moveLine', Number.parseInt(line.value, 10));
               break;
 
             case 'TTBREAK':
@@ -803,9 +805,7 @@ function getCourse(tjaHeaders, lines) {
     // Make first BPM event
     let firstBpmEventFound = false;
 
-    for (let i = 0; i < measures[0].events.length; i++) {
-      const evt = measures[0].events[i];
-
+    for (const evt of measures[0].events) {
       if (evt.name === 'bpm' && evt.position === 0) {
         firstBpmEventFound = true;
         break;
@@ -858,13 +858,13 @@ function getCourse(tjaHeaders, lines) {
       }
     }
 
-    const fixedMax = (measures[i].nDivisions = arrayLCM(lengths));
+    const fixedMax = arrayLCM(lengths);
+    measures[i].nDivisions = fixedMax;
 
-    for (let j = 0; j < measures[i].events.length; j++) {
-      if (measures[i].data[measures[i].events[j].branch] != null) {
-        const rate =
-          fixedMax / measures[i].data[measures[i].events[j].branch].nDivisions;
-        measures[i].events[j].position *= rate;
+    for (const event of measures[i].events) {
+      if (measures[i].data[event.branch] != null) {
+        const rate = fixedMax / measures[i].data[event.branch].nDivisions;
+        event.position *= rate;
       }
     }
 
@@ -982,7 +982,7 @@ function getCourse(tjaHeaders, lines) {
   };
 }
 
-export default function parseTJA(tja) {
+export function parseTja(tja) {
   // Split by lines
   const lines = tja.split(/(\r\n|\r|\n)/).map((line) => line.trim());
 
@@ -1186,9 +1186,7 @@ export function getCourseLines(tja, chart, courseId) {
 
   const lines = tja.split(/(\r\n|\r|\n)/);
 
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
-
+  for (const line of lines) {
     const parsed = parseLine(line);
     if (parsed === null) {
       continue;

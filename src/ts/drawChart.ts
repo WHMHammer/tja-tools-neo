@@ -342,7 +342,7 @@ function drawFuseSprite(
 //==============================================================================
 // Main drawing function
 
-export default function (chart, courseId) {
+export function drawChart(chart, courseId) {
   const course = chart.courses[courseId];
 
   // Useful values
@@ -365,9 +365,8 @@ export default function (chart, courseId) {
   for (let midx = 0; midx < course.measures.length; midx++) {
     const rowBeatM = rowBeats[rowBeats.length - 1];
     const measure = course.measures[midx];
-    const measureBeat = (measure.nBeats = Math.abs(
-      (measure.length[0] / measure.length[1]) * 4,
-    ));
+    const measureBeat = Math.abs((measure.length[0] / measure.length[1]) * 4);
+    measure.nBeats = measureBeat;
     measure.nBeatNotes = Math.abs(
       (measure.lengthNotes[0] / measure.lengthNotes[1]) * 4,
     );
@@ -516,829 +515,809 @@ export default function (chart, courseId) {
   //document.body.appendChild($canvas);
 
   const ctx = $canvas.getContext('2d');
+  //============================================================================
+  // 2. Background, rows, informations
 
-  try {
-    //============================================================================
-    // 2. Background, rows, informations
+  drawRect(ctx, 0, 0, canvasWidth, canvasHeight, CHART_BG);
 
-    drawRect(ctx, 0, 0, canvasWidth, canvasHeight, CHART_BG);
+  for (let ridx = 0; ridx < rows.length; ridx++) {
+    function drawLaneRow(ctx, y, sx, ex, branches) {
+      const w = ex - sx;
+      const rowOffsetTop = 4;
+      const rowOffsetBottom = rowOffsetTop + branches.length * 24;
 
-    for (let ridx = 0; ridx < rows.length; ridx++) {
-      function drawLaneRow(ctx, y, sx, ex, branches) {
-        const w = ex - sx;
-        const rowOffsetTop = 4;
-        const rowOffsetBottom = rowOffsetTop + branches.length * 24;
-
-        for (let bidx = 0; bidx < branches.length; ++bidx) {
-          drawRect(
-            ctx,
-            sx,
-            y + ROW_HEIGHT_INFO + rowOffsetTop + bidx * 24,
-            w,
-            24,
-            ROW_COLOR[branches[bidx]],
-          );
-        }
-
-        drawRect(ctx, sx, y + ROW_HEIGHT_INFO, w, 2, '#000');
-        drawRect(ctx, sx, y + ROW_HEIGHT_INFO + 2, w, 2, '#fff');
-
+      for (let bidx = 0; bidx < branches.length; ++bidx) {
         drawRect(
           ctx,
           sx,
-          y + ROW_HEIGHT_INFO + rowOffsetTop,
+          y + ROW_HEIGHT_INFO + rowOffsetTop + bidx * 24,
           w,
-          1,
-          '#ffffffa8',
-        );
-        drawRect(
-          ctx,
-          sx,
-          y + ROW_HEIGHT_INFO + rowOffsetTop + 1,
-          w,
-          1,
-          '#ffffff54',
-        );
-
-        drawRect(
-          ctx,
-          sx,
-          y + ROW_HEIGHT_INFO + rowOffsetBottom - 2,
-          w,
-          1,
-          '#ffffff54',
-        );
-        drawRect(
-          ctx,
-          sx,
-          y + ROW_HEIGHT_INFO + rowOffsetBottom - 1,
-          w,
-          1,
-          '#ffffffa8',
-        );
-        drawRect(ctx, sx, y + ROW_HEIGHT_INFO + rowOffsetBottom, w, 2, '#fff');
-        drawRect(
-          ctx,
-          sx,
-          y + ROW_HEIGHT_INFO + rowOffsetBottom + 2,
-          w,
-          2,
-          '#000',
+          24,
+          ROW_COLOR[branches[bidx]],
         );
       }
 
-      const row = rows[ridx];
-      const measures = row.measures;
+      drawRect(ctx, sx, y + ROW_HEIGHT_INFO, w, 2, '#000');
+      drawRect(ctx, sx, y + ROW_HEIGHT_INFO + 2, w, 2, '#fff');
 
-      const rowWidth = ROW_LEADING + BEAT_WIDTH * row.totalBeat + ROW_TRAILING;
-      const y = GET_ROW_Y(ridx);
+      drawRect(ctx, sx, y + ROW_HEIGHT_INFO + rowOffsetTop, w, 1, '#ffffffa8');
+      drawRect(
+        ctx,
+        sx,
+        y + ROW_HEIGHT_INFO + rowOffsetTop + 1,
+        w,
+        1,
+        '#ffffff54',
+      );
 
-      row.sxNoPads = [];
-      row.exNoPads = [];
-      for (let midx = 0; midx < measures.length; ++midx) {
-        const measure = row.measures[midx];
-        const sx = midx === 0 ? 0 : GET_BEAT_X(row.rowBeats[midx]);
-        const ex =
-          midx + 1 >= measures.length
-            ? rowWidth
-            : GET_BEAT_X(row.rowBeats[midx + 1]);
-        const branches = measure.dataBranches;
-        const branchesPrev =
-          midx === 0 ? branches : row.measures[midx - 1].dataBranches;
-        const branchesNext =
-          midx + 1 >= measures.length
-            ? branches
-            : row.measures[midx + 1].dataBranches;
-        const padPrev = branchesPrev.length > branches.length;
-        const padNext = branchesNext.length > branches.length;
-        let sxNoPad = (row.sxNoPads[midx] = padPrev
-          ? Math.min(ex, sx + ROW_TRAILING)
-          : sx);
-        let exNoPad = (row.exNoPads[midx] = padNext
-          ? Math.max(sx, ex - ROW_LEADING)
-          : ex);
-        if (padPrev && padNext && sxNoPad >= exNoPad) {
-          // space is not enough; do not pad
-          sxNoPad = sx;
-          exNoPad = ex;
-        }
-        if (padPrev) {
-          const branchesPad = branchesPrev.map((e, i) => branches[i] || e);
-          drawLaneRow(ctx, y, sx, sxNoPad, branchesPad);
-        }
-        drawLaneRow(ctx, y, sxNoPad, exNoPad, measure.dataBranches);
-        if (padNext) {
-          const branchesPad = branchesNext.map((e, i) => branches[i] || e);
-          drawLaneRow(ctx, y, exNoPad, ex, branchesPad);
-        }
+      drawRect(
+        ctx,
+        sx,
+        y + ROW_HEIGHT_INFO + rowOffsetBottom - 2,
+        w,
+        1,
+        '#ffffff54',
+      );
+      drawRect(
+        ctx,
+        sx,
+        y + ROW_HEIGHT_INFO + rowOffsetBottom - 1,
+        w,
+        1,
+        '#ffffffa8',
+      );
+      drawRect(ctx, sx, y + ROW_HEIGHT_INFO + rowOffsetBottom, w, 2, '#fff');
+      drawRect(
+        ctx,
+        sx,
+        y + ROW_HEIGHT_INFO + rowOffsetBottom + 2,
+        w,
+        2,
+        '#000',
+      );
+    }
+
+    const row = rows[ridx];
+    const measures = row.measures;
+
+    const rowWidth = ROW_LEADING + BEAT_WIDTH * row.totalBeat + ROW_TRAILING;
+    const y = GET_ROW_Y(ridx);
+
+    row.sxNoPads = [];
+    row.exNoPads = [];
+    for (let midx = 0; midx < measures.length; ++midx) {
+      const measure = row.measures[midx];
+      const sx = midx === 0 ? 0 : GET_BEAT_X(row.rowBeats[midx]);
+      const ex =
+        midx + 1 >= measures.length
+          ? rowWidth
+          : GET_BEAT_X(row.rowBeats[midx + 1]);
+      const branches = measure.dataBranches;
+      const branchesPrev =
+        midx === 0 ? branches : row.measures[midx - 1].dataBranches;
+      const branchesNext =
+        midx + 1 >= measures.length
+          ? branches
+          : row.measures[midx + 1].dataBranches;
+      const padPrev = branchesPrev.length > branches.length;
+      const padNext = branchesNext.length > branches.length;
+      let sxNoPad = padPrev ? Math.min(ex, sx + ROW_TRAILING) : sx;
+      row.sxNoPads[midx] = sxNoPad;
+      let exNoPad = padNext ? Math.max(sx, ex - ROW_LEADING) : ex;
+      row.exNoPads[midx] = exNoPad;
+      if (padPrev && padNext && sxNoPad >= exNoPad) {
+        // space is not enough; do not pad
+        sxNoPad = sx;
+        exNoPad = ex;
+      }
+      if (padPrev) {
+        const branchesPad = branchesPrev.map((e, i) => branches[i] || e);
+        drawLaneRow(ctx, y, sx, sxNoPad, branchesPad);
+      }
+      drawLaneRow(ctx, y, sxNoPad, exNoPad, measure.dataBranches);
+      if (padNext) {
+        const branchesPad = branchesNext.map((e, i) => branches[i] || e);
+        drawLaneRow(ctx, y, exNoPad, ex, branchesPad);
       }
     }
+  }
 
-    const uraSymbols = getUraSymbol(/* chart.headers.font.toLowerCase() */);
-    const titleUraSymbol = uraSymbols.title;
-    const levelUraSymbol = uraSymbols.level;
+  const uraSymbols = getUraSymbol(/* chart.headers.font.toLowerCase() */);
+  const titleUraSymbol = uraSymbols.title;
+  const levelUraSymbol = uraSymbols.level;
 
-    const fixedTitle =
-      course.headers.course === 4 && chart.headers.levelUra != 1
-        ? chart.headers.title + titleUraSymbol
-        : chart.headers.title;
+  const fixedTitle =
+    course.headers.course === 4 && chart.headers.levelUra != 1
+      ? chart.headers.title + titleUraSymbol
+      : chart.headers.title;
 
-    const difficulty = [
-      'かんたん',
-      'ふつう',
-      'むずかしい',
-      'おに',
-      'おに' + (chart.headers.levelUra === 1 ? levelUraSymbol : ''),
-    ];
-    const levelMax = [
-      5,
-      7,
-      8,
-      10,
-      10,
-    ];
-    const levelInt = Number.parseInt(course.headers.level);
-    const difficultyText =
-      difficulty[course.headers.course]
-      + ' '
-      + '★'.repeat(
-        Math.max(Math.min(levelMax[course.headers.course], levelInt), 0),
-      )
-      + (levelInt > levelMax[course.headers.course] ? '+' : '')
-      + '☆'.repeat(Math.max(levelMax[course.headers.course] - levelInt, 0))
-      + ` Lv.${course.headers.level}`;
+  const difficulty = [
+    'かんたん',
+    'ふつう',
+    'むずかしい',
+    'おに',
+    'おに' + (chart.headers.levelUra === 1 ? levelUraSymbol : ''),
+  ];
+  const levelMax = [
+    5,
+    7,
+    8,
+    10,
+    10,
+  ];
+  const levelInt = Number.parseInt(course.headers.level, 10);
+  const difficultyText =
+    difficulty[course.headers.course]
+    + ' '
+    + '★'.repeat(
+      Math.max(Math.min(levelMax[course.headers.course], levelInt), 0),
+    )
+    + (levelInt > levelMax[course.headers.course] ? '+' : '')
+    + '☆'.repeat(Math.max(levelMax[course.headers.course] - levelInt, 0))
+    + ` Lv.${course.headers.level}`;
 
-    let titleTextColor = '#000';
-    if (chart.headers.titleColor === 1 || chart.headers.titleColor === 2) {
-      if (
-        chart.headers.genre === 'J-POP'
-        || chart.headers.genre === 'ポップス'
-      ) {
-        titleTextColor = chart.headers.titleColor === 2 ? '#49d5eb' : '#005057';
-      } else if (chart.headers.genre === 'キッズ') {
-        titleTextColor = chart.headers.titleColor === 2 ? '#fdc000' : '#a53200';
-      } else if (chart.headers.genre === 'アニメ') {
-        titleTextColor = chart.headers.titleColor === 2 ? '#ffad33' : '#a73b00';
-      } else if (chart.headers.genre === 'アニメ2') {
-        titleTextColor = chart.headers.titleColor === 2 ? '#fe90d2' : '#9b1863';
-      } else if (
-        chart.headers.genre === 'ボーカロイド™楽曲'
-        || chart.headers.genre === 'ボーカロイド™'
-        || chart.headers.genre === 'ボーカロイド'
-        || chart.headers.genre === 'ボーカロイド楽曲'
-        || chart.headers.genre === 'ボカロ楽曲'
-        || chart.headers.genre === 'ボカロ'
-      ) {
-        titleTextColor = chart.headers.titleColor === 2 ? '#cbcfde' : '#263449';
-      } else if (
-        chart.headers.genre === 'ゲームミュージック'
-        || chart.headers.genre === 'ゲーミュ'
-      ) {
-        titleTextColor = chart.headers.titleColor === 2 ? '#cc8aeb' : '#4e1d76';
-      } else if (chart.headers.genre === 'バラエティ') {
-        titleTextColor = chart.headers.titleColor === 2 ? '#0acc2a' : '#144f14';
-      } else if (chart.headers.genre === 'クラシック') {
-        titleTextColor = chart.headers.titleColor === 2 ? '#ded523' : '#65432a';
-      } else if (
-        chart.headers.genre === 'ナムコオリジナル'
-        || chart.headers.genre === 'ナムオリ'
-      ) {
-        titleTextColor = chart.headers.titleColor === 2 ? '#ff7028' : '#961f00';
+  let titleTextColor = '#000';
+  if (chart.headers.titleColor === 1 || chart.headers.titleColor === 2) {
+    if (chart.headers.genre === 'J-POP' || chart.headers.genre === 'ポップス') {
+      titleTextColor = chart.headers.titleColor === 2 ? '#49d5eb' : '#005057';
+    } else if (chart.headers.genre === 'キッズ') {
+      titleTextColor = chart.headers.titleColor === 2 ? '#fdc000' : '#a53200';
+    } else if (chart.headers.genre === 'アニメ') {
+      titleTextColor = chart.headers.titleColor === 2 ? '#ffad33' : '#a73b00';
+    } else if (chart.headers.genre === 'アニメ2') {
+      titleTextColor = chart.headers.titleColor === 2 ? '#fe90d2' : '#9b1863';
+    } else if (
+      chart.headers.genre === 'ボーカロイド™楽曲'
+      || chart.headers.genre === 'ボーカロイド™'
+      || chart.headers.genre === 'ボーカロイド'
+      || chart.headers.genre === 'ボーカロイド楽曲'
+      || chart.headers.genre === 'ボカロ楽曲'
+      || chart.headers.genre === 'ボカロ'
+    ) {
+      titleTextColor = chart.headers.titleColor === 2 ? '#cbcfde' : '#263449';
+    } else if (
+      chart.headers.genre === 'ゲームミュージック'
+      || chart.headers.genre === 'ゲーミュ'
+    ) {
+      titleTextColor = chart.headers.titleColor === 2 ? '#cc8aeb' : '#4e1d76';
+    } else if (chart.headers.genre === 'バラエティ') {
+      titleTextColor = chart.headers.titleColor === 2 ? '#0acc2a' : '#144f14';
+    } else if (chart.headers.genre === 'クラシック') {
+      titleTextColor = chart.headers.titleColor === 2 ? '#ded523' : '#65432a';
+    } else if (
+      chart.headers.genre === 'ナムコオリジナル'
+      || chart.headers.genre === 'ナムオリ'
+    ) {
+      titleTextColor = chart.headers.titleColor === 2 ? '#ff7028' : '#961f00';
+    }
+  }
+
+  let levelTextColor = '#000';
+  const diffColors = [
+    '#f22706',
+    '#92c400',
+    '#0090e8',
+    '#ce00a2',
+    '#5a3cdc',
+  ];
+  switch (chart.headers.levelColor) {
+    case 1:
+      levelTextColor = diffColors[course.headers.course];
+      if (course.headers.course === 4) {
+        levelTextColor = diffColors[3];
       }
-    }
+      break;
+    case 2:
+      levelTextColor = diffColors[course.headers.course];
+      break;
+  }
 
-    let levelTextColor = '#000';
-    const diffColors = [
-      '#f22706',
-      '#92c400',
-      '#0090e8',
-      '#ce00a2',
-      '#5a3cdc',
-    ];
-    switch (chart.headers.levelColor) {
-      case 1:
-        levelTextColor = diffColors[course.headers.course];
-        if (course.headers.course === 4) {
-          levelTextColor = diffColors[3];
-        }
-        break;
-      case 2:
-        levelTextColor = diffColors[course.headers.course];
-        break;
-    }
-
+  drawText(
+    ctx,
+    fontSetting.xTitle,
+    textPositionY.title,
+    fixedTitle,
+    fontSetting.titleText,
+    titleTextColor,
+    'top',
+    'left',
+    fontSetting.strokeTitle,
+  );
+  if (chart.headers.subtitle) {
     drawText(
       ctx,
       fontSetting.xTitle,
-      textPositionY.title,
-      fixedTitle,
-      fontSetting.titleText,
+      textPositionY.subtitle,
+      chart.headers.subtitle,
+      fontSetting.subtitleText,
       titleTextColor,
       'top',
       'left',
       fontSetting.strokeTitle,
     );
-    if (chart.headers.subtitle) {
-      drawText(
-        ctx,
-        fontSetting.xTitle,
-        textPositionY.subtitle,
-        chart.headers.subtitle,
-        fontSetting.subtitleText,
-        titleTextColor,
-        'top',
-        'left',
-        fontSetting.strokeTitle,
-      );
-    }
-    if (maker !== null) {
-      drawText(
-        ctx,
-        fontSetting.xDifficulty,
-        textPositionY.maker,
-        `Charter: ${maker}`,
-        fontSetting.subtitleText,
-        levelTextColor,
-        'top',
-        'left',
-        fontSetting.strokeTitle,
-      );
-    }
+  }
+  if (maker !== null) {
     drawText(
       ctx,
       fontSetting.xDifficulty,
-      textPositionY.difficulty,
-      difficultyText,
+      textPositionY.maker,
+      `Charter: ${maker}`,
       fontSetting.subtitleText,
       levelTextColor,
       'top',
       'left',
-      fontSetting.strokeDifficulty,
+      fontSetting.strokeTitle,
     );
+  }
+  drawText(
+    ctx,
+    fontSetting.xDifficulty,
+    textPositionY.difficulty,
+    difficultyText,
+    fontSetting.subtitleText,
+    levelTextColor,
+    'top',
+    'left',
+    fontSetting.strokeDifficulty,
+  );
 
-    //============================================================================
-    // 3. Go-go time, measure grid, events
+  //============================================================================
+  // 3. Go-go time, measure grid, events
 
-    let gogoStart = false;
-    let measureNumber = 1;
-    let barline = true;
-    let moveEvent = 0;
-    let avoidText = true;
+  let gogoStart = false;
+  let measureNumber = 1;
+  let barline = true;
+  let moveEvent = 0;
+  let avoidText = true;
 
-    for (let ridx = 0; ridx < rows.length; ridx++) {
-      const row = rows[ridx];
-      const measures = row.measures;
+  for (let ridx = 0; ridx < rows.length; ridx++) {
+    const row = rows[ridx];
+    const measures = row.measures;
 
-      for (let midx = 0; midx < measures.length; midx++) {
-        const measure = measures[midx];
+    for (let midx = 0; midx < measures.length; midx++) {
+      const measure = measures[midx];
 
-        // Go-go time
-        for (let i = 0; i < measure.events.length; i++) {
-          const event = measure.events[i];
-          if (!IS_POSITION_IN_ROW(row, midx, event.position)) {
-            continue;
-          }
-          const eBeat = GET_MEASURE_POS_BEAT(
-            row.rowBeats[midx],
-            measure,
-            event.position,
-          );
-
-          if (event.name === 'gogoStart' && !gogoStart) {
-            gogoStart = [
-              ridx,
-              eBeat,
-            ];
-          } else if (event.name === 'gogoEnd' && gogoStart) {
-            drawLongSprite(
-              ctx,
-              rows,
-              'N',
-              gogoStart[0],
-              gogoStart[1],
-              ridx,
-              eBeat,
-              'gogo',
-            );
-            gogoStart = false;
-          }
+      // Go-go time
+      for (const event of measure.events) {
+        if (!IS_POSITION_IN_ROW(row, midx, event.position)) {
+          continue;
         }
-      }
-
-      if (ridx == rows.length - 1 && gogoStart) {
-        drawLongSprite(
-          ctx,
-          rows,
-          'N',
-          gogoStart[0],
-          gogoStart[1],
-          ridx,
-          row.totalBeat + 0.5,
-          'gogo',
+        const eBeat = GET_MEASURE_POS_BEAT(
+          row.rowBeats[midx],
+          measure,
+          event.position,
         );
+
+        if (event.name === 'gogoStart' && !gogoStart) {
+          gogoStart = [
+            ridx,
+            eBeat,
+          ];
+        } else if (event.name === 'gogoEnd' && gogoStart) {
+          drawLongSprite(
+            ctx,
+            rows,
+            'N',
+            gogoStart[0],
+            gogoStart[1],
+            ridx,
+            eBeat,
+            'gogo',
+          );
+          gogoStart = false;
+        }
       }
     }
 
-    for (let ridx = 0; ridx < rows.length; ridx++) {
-      const row = rows[ridx];
-      const measures = row.measures;
-      const eventCover = [];
+    if (ridx == rows.length - 1 && gogoStart) {
+      drawLongSprite(
+        ctx,
+        rows,
+        'N',
+        gogoStart[0],
+        gogoStart[1],
+        ridx,
+        row.totalBeat + 0.5,
+        'gogo',
+      );
+    }
+  }
 
-      const y = GET_ROW_Y(ridx);
+  for (let ridx = 0; ridx < rows.length; ridx++) {
+    const row = rows[ridx];
+    const measures = row.measures;
+    const eventCover = [];
 
-      for (let midx = 0; midx < measures.length; midx++) {
-        const measure = measures[midx];
-        const mx = GET_BEAT_X(row.rowBeats[midx]);
+    const y = GET_ROW_Y(ridx);
 
-        // Sub grid
-        const ny = y + ROW_HEIGHT_INFO;
+    for (let midx = 0; midx < measures.length; midx++) {
+      const measure = measures[midx];
+      const mx = GET_BEAT_X(row.rowBeats[midx]);
 
-        const isRowEnd = midx == measures.length - 1;
-        const nGridsBody = Math.ceil(Math.abs(measure.length[0]) * 2);
-        const nGrids = nGridsBody + (isRowEnd ? 1 : 0);
-        for (let i = 0; i < nGrids; i++) {
-          const subBeat =
-            i >= nGridsBody
-              ? measure.nBeats
-              : (i / Math.abs(measure.length[1])) * 2;
-          const beat = row.rowBeats[midx] + subBeat;
-          if (!(beat >= 0 && beat <= row.totalBeat)) {
-            continue;
-          }
-          const subx = GET_BEAT_X(beat);
-          const style =
-            '#ffffff' + (i % 2 === 0 || i >= nGridsBody ? '7f' : '3f');
-          // Measure-end grid for just-"merged" branch lanes
-          const rowDelta =
-            i === 0 && midx > 0
-              ? Math.max(row.measures[midx - 1].rowDelta, measure.rowDelta)
-              : measure.rowDelta;
-          const edgeDelta =
-            subx < row.sxNoPads[midx] || subx > row.exNoPads[midx] ? -4 : 0;
-          drawLine(
-            ctx,
-            subx,
-            ny,
-            subx,
-            ny + ROW_HEIGHT_NOTE + rowDelta + edgeDelta,
-            2,
-            style,
-          );
+      // Sub grid
+      const ny = y + ROW_HEIGHT_INFO;
+
+      const isRowEnd = midx == measures.length - 1;
+      const nGridsBody = Math.ceil(Math.abs(measure.length[0]) * 2);
+      const nGrids = nGridsBody + (isRowEnd ? 1 : 0);
+      for (let i = 0; i < nGrids; i++) {
+        const subBeat =
+          i >= nGridsBody
+            ? measure.nBeats
+            : (i / Math.abs(measure.length[1])) * 2;
+        const beat = row.rowBeats[midx] + subBeat;
+        if (!(beat >= 0 && beat <= row.totalBeat)) {
+          continue;
         }
+        const subx = GET_BEAT_X(beat);
+        const style =
+          '#ffffff' + (i % 2 === 0 || i >= nGridsBody ? '7f' : '3f');
+        // Measure-end grid for just-"merged" branch lanes
+        const rowDelta =
+          i === 0 && midx > 0
+            ? Math.max(row.measures[midx - 1].rowDelta, measure.rowDelta)
+            : measure.rowDelta;
+        const edgeDelta =
+          subx < row.sxNoPads[midx] || subx > row.exNoPads[midx] ? -4 : 0;
+        drawLine(
+          ctx,
+          subx,
+          ny,
+          subx,
+          ny + ROW_HEIGHT_NOTE + rowDelta + edgeDelta,
+          2,
+          style,
+        );
+      }
 
-        // Measure number
-        //drawPixelText(ctx, mx + 2, y + ROW_HEIGHT_INFO - 1, measureNumber.toString(), '#000', 'bottom', 'left');
-        let barlineDrawn = false;
-        if (IS_POSITION_IN_ROW(row, midx, 0)) {
-          drawImageText(
-            ctx,
-            mx,
-            y + ROW_HEIGHT_INFO - 6,
-            measureNumber.toString(),
-            'num',
-          );
-          measureNumber += 1;
-        } else {
-          barlineDrawn = true;
-        }
+      // Measure number
+      //drawPixelText(ctx, mx + 2, y + ROW_HEIGHT_INFO - 1, measureNumber.toString(), '#000', 'bottom', 'left');
+      let barlineDrawn = false;
+      if (IS_POSITION_IN_ROW(row, midx, 0)) {
+        drawImageText(
+          ctx,
+          mx,
+          y + ROW_HEIGHT_INFO - 6,
+          measureNumber.toString(),
+          'num',
+        );
+        measureNumber += 1;
+      } else {
+        barlineDrawn = true;
+      }
 
-        // Measure lines
-        const branchStart = {};
-        let lastUpperLinePosition = null;
-        let lastLowerLinePosition = null;
-        function drawBarline(ex, position, isEvent, scrollCount = 1) {
-          const edgeDelta =
-            ex < row.sxNoPads[midx] || ex > row.exNoPads[midx] ? -4 : 0;
-          if (position !== lastUpperLinePosition) {
-            const lineColorUpper =
-              position === branchStart.position
-                ? LINE_COLOR.branch
-                : position === 0
-                  ? barline
-                    ? LINE_COLOR.normal
-                    : null
-                  : isEvent
-                    ? LINE_COLOR.event
-                    : null;
-            if (lineColorUpper !== null) {
-              drawLine(
-                ctx,
-                ex,
-                y + moveEvent - (scrollCount - 1) * 6,
-                ex,
-                y + ROW_HEIGHT_INFO,
-                2,
-                lineColorUpper,
-                eventCover,
-                avoidText,
-              );
-              lastUpperLinePosition = position;
-            }
-          }
-          if (position !== lastLowerLinePosition) {
-            const lineColorLower =
-              position === 0
+      // Measure lines
+      const branchStart = {};
+      let lastUpperLinePosition = null;
+      let lastLowerLinePosition = null;
+      function drawBarline(ex, position, isEvent, scrollCount = 1) {
+        const edgeDelta =
+          ex < row.sxNoPads[midx] || ex > row.exNoPads[midx] ? -4 : 0;
+        if (position !== lastUpperLinePosition) {
+          const lineColorUpper =
+            position === branchStart.position
+              ? LINE_COLOR.branch
+              : position === 0
                 ? barline
-                  ? position === branchStart.position
-                    ? LINE_COLOR.branch
-                    : LINE_COLOR.normal
+                  ? LINE_COLOR.normal
                   : null
                 : isEvent
                   ? LINE_COLOR.event
                   : null;
-            if (lineColorLower !== null) {
-              drawLine(
-                ctx,
-                ex,
-                y + ROW_HEIGHT_INFO,
-                ex,
-                y + ROW_HEIGHT + measure.rowDelta + edgeDelta,
-                2,
-                lineColorLower,
-                eventCover,
-                avoidText,
-              );
-              lastLowerLinePosition = position;
-            }
-            if (ridx > 0 && midx === 0 && position === 0 && barline) {
-              // Draw last measure line
-              const lastRow = rows[ridx - 1];
-              const y2 = GET_ROW_Y(ridx - 1);
-              const mx2 = GET_BEAT_X(lastRow.totalBeat);
-              const lastMidx = lastRow.measures.length - 1;
-              const edgeDelta2 =
-                mx2 < lastRow.sxNoPads[lastMidx]
-                || mx2 > lastRow.exNoPads[lastMidx]
-                  ? -4
-                  : 0;
-              drawLine(
-                ctx,
-                mx2,
-                y2,
-                mx2,
-                y2
-                  + ROW_HEIGHT
-                  + lastRow.measures[lastMidx].rowDelta
-                  + edgeDelta2,
-                2,
-                LINE_COLOR.normal,
-                eventCover,
-                avoidText,
-              );
-            }
-          }
-          if (position === 0) {
-            barlineDrawn = true;
-          }
-          if (position === branchStart.position) {
-            branchStart.position = undefined;
-            branchStart.ex = undefined;
+          if (lineColorUpper !== null) {
+            drawLine(
+              ctx,
+              ex,
+              y + moveEvent - (scrollCount - 1) * 6,
+              ex,
+              y + ROW_HEIGHT_INFO,
+              2,
+              lineColorUpper,
+              eventCover,
+              avoidText,
+            );
+            lastUpperLinePosition = position;
           }
         }
-
-        // Events
-        function eventProcessOrder(event) {
-          switch (event.name) {
-            default: // no lines
-              return 0;
-            case 'scroll': // has line, highest
-              return 1;
-            case 'bpm':
-              return 2;
+        if (position !== lastLowerLinePosition) {
+          const lineColorLower =
+            position === 0
+              ? barline
+                ? position === branchStart.position
+                  ? LINE_COLOR.branch
+                  : LINE_COLOR.normal
+                : null
+              : isEvent
+                ? LINE_COLOR.event
+                : null;
+          if (lineColorLower !== null) {
+            drawLine(
+              ctx,
+              ex,
+              y + ROW_HEIGHT_INFO,
+              ex,
+              y + ROW_HEIGHT + measure.rowDelta + edgeDelta,
+              2,
+              lineColorLower,
+              eventCover,
+              avoidText,
+            );
+            lastLowerLinePosition = position;
+          }
+          if (ridx > 0 && midx === 0 && position === 0 && barline) {
+            // Draw last measure line
+            const lastRow = rows[ridx - 1];
+            const y2 = GET_ROW_Y(ridx - 1);
+            const mx2 = GET_BEAT_X(lastRow.totalBeat);
+            const lastMidx = lastRow.measures.length - 1;
+            const edgeDelta2 =
+              mx2 < lastRow.sxNoPads[lastMidx]
+              || mx2 > lastRow.exNoPads[lastMidx]
+                ? -4
+                : 0;
+            drawLine(
+              ctx,
+              mx2,
+              y2,
+              mx2,
+              y2
+                + ROW_HEIGHT
+                + lastRow.measures[lastMidx].rowDelta
+                + edgeDelta2,
+              2,
+              LINE_COLOR.normal,
+              eventCover,
+              avoidText,
+            );
           }
         }
-        const events = measure.events
-          .map((e, i) => ({
-            e,
-            i,
-          }))
-          .sort(
-            (a, b) =>
-              a.e.position - b.e.position
-              || eventProcessOrder(a.e) - eventProcessOrder(b.e)
-              || a.i - b.i,
-          )
-          .map((e) => e.e);
+        if (position === 0) {
+          barlineDrawn = true;
+        }
+        if (position === branchStart.position) {
+          branchStart.position = undefined;
+          branchStart.ex = undefined;
+        }
+      }
 
-        for (const event of events) {
-          if (!IS_POSITION_IN_ROW(row, midx, event.position)) {
-            continue;
-          }
-          const eBeat = GET_MEASURE_POS_BEAT(
-            row.rowBeats[midx],
-            measure,
-            event.position,
-          );
-          const ex = GET_BEAT_X(eBeat);
+      // Events
+      function eventProcessOrder(event) {
+        switch (event.name) {
+          case 'scroll': // has line, highest
+            return 1;
+          case 'bpm':
+            return 2;
+          default: // no lines
+            return 0;
+        }
+      }
+      const events = measure.events
+        .map((e, i) => ({
+          e,
+          i,
+        }))
+        .sort(
+          (a, b) =>
+            a.e.position - b.e.position
+            || eventProcessOrder(a.e) - eventProcessOrder(b.e)
+            || a.i - b.i,
+        )
+        .map((e) => e.e);
 
-          if (event.position !== 0 && !barlineDrawn) {
-            drawBarline(mx, 0, false);
-          } else if (event.position > branchStart.position) {
-            drawBarline(branchStart.ex, branchStart.position, false);
-          }
+      for (const event of events) {
+        if (!IS_POSITION_IN_ROW(row, midx, event.position)) {
+          continue;
+        }
+        const eBeat = GET_MEASURE_POS_BEAT(
+          row.rowBeats[midx],
+          measure,
+          event.position,
+        );
+        const ex = GET_BEAT_X(eBeat);
 
-          if (event.name === 'scroll') {
-            const scrollsTemp = [];
-            const valueLookup = {};
-            for (const bt in event.value) {
-              if (event.value[bt] === null) {
-                continue;
-              }
-              if (valueLookup[event.value[bt]] === undefined) {
-                scrollsTemp.push(
-                  (valueLookup[event.value[bt]] = {
-                    value: event.value[bt],
-                    branch: [],
-                  }),
-                );
-              }
-              valueLookup[event.value[bt]].branch.push(bt);
+        if (event.position !== 0 && !barlineDrawn) {
+          drawBarline(mx, 0, false);
+        } else if (event.position > branchStart.position) {
+          drawBarline(branchStart.ex, branchStart.position, false);
+        }
+
+        if (event.name === 'scroll') {
+          const scrollsTemp = [];
+          const valueLookup = {};
+          for (const bt in event.value) {
+            if (event.value[bt] === null) {
+              continue;
             }
+            if (valueLookup[event.value[bt]] === undefined) {
+              valueLookup[event.value[bt]] = {
+                value: event.value[bt],
+                branch: [],
+              };
+              scrollsTemp.push(valueLookup[event.value[bt]]);
+            }
+            valueLookup[event.value[bt]].branch.push(bt);
+          }
 
-            drawBarline(ex, event.position, true, scrollsTemp.length);
-            //drawPixelText(ctx, ex + 2, y + ROW_HEIGHT_INFO - 13, 'HS ' + toFixedZero(event.value.toFixed(2)), '#f00', 'bottom', 'left');
+          drawBarline(ex, event.position, true, scrollsTemp.length);
+          //drawPixelText(ctx, ex + 2, y + ROW_HEIGHT_INFO - 13, 'HS ' + toFixedZero(event.value.toFixed(2)), '#f00', 'bottom', 'left');
 
-            let scrollCount = 0;
-            for (let si = scrollsTemp.length; si-- > 0; ) {
-              const sTemp = scrollsTemp[si];
-              let scrollText = '';
+          let scrollCount = 0;
+          for (let si = scrollsTemp.length; si-- > 0; ) {
+            const sTemp = scrollsTemp[si];
+            let scrollText = '';
 
-              if (event.branching) {
-                for (const stb of sTemp.branch) {
-                  if (stb === 'N') {
-                    scrollText += '普';
-                  } else if (stb === 'E') {
-                    scrollText += '玄';
-                  } else if (stb === 'M') {
-                    scrollText += '達';
-                  }
+            if (event.branching) {
+              for (const stb of sTemp.branch) {
+                if (stb === 'N') {
+                  scrollText += '普';
+                } else if (stb === 'E') {
+                  scrollText += '玄';
+                } else if (stb === 'M') {
+                  scrollText += '達';
                 }
               }
-
-              scrollText +=
-                'HS' + toFixedZero(Number.parseFloat(sTemp.value).toFixed(2));
-              drawImageText(
-                ctx,
-                ex,
-                y + ROW_HEIGHT_INFO - 18 + moveEvent - scrollCount * 6,
-                scrollText,
-                'hs',
-              );
-              eventCover.push({
-                stx: ex + 1,
-                sty: y + ROW_HEIGHT_INFO - 18 + moveEvent - scrollCount * 6,
-                enx: ex + 6 * scrollText.length - 1,
-                eny: y + ROW_HEIGHT_INFO - 18 + moveEvent - scrollCount * 6 + 5,
-              });
-              scrollCount++;
             }
-          } else if (event.name === 'bpm') {
-            drawBarline(ex, event.position, true);
-            //drawPixelText(ctx, ex + 2, y + ROW_HEIGHT_INFO - 7, 'BPM ' + toFixedZero(event.value.toFixed(2)), '#00f', 'bottom', 'left');
 
-            const bpmText =
-              'BPM' + toFixedZero(Number.parseFloat(event.value).toFixed(2));
+            scrollText +=
+              'HS' + toFixedZero(Number.parseFloat(sTemp.value).toFixed(2));
             drawImageText(
               ctx,
               ex,
-              y + ROW_HEIGHT_INFO - 12 + moveEvent,
-              bpmText,
-              'bpm',
+              y + ROW_HEIGHT_INFO - 18 + moveEvent - scrollCount * 6,
+              scrollText,
+              'hs',
             );
             eventCover.push({
               stx: ex + 1,
-              sty: y + ROW_HEIGHT_INFO - 12 + moveEvent,
-              enx: ex + 6 * bpmText.length - 1,
-              eny: y + ROW_HEIGHT_INFO - 12 + moveEvent + 5,
+              sty: y + ROW_HEIGHT_INFO - 18 + moveEvent - scrollCount * 6,
+              enx: ex + 6 * scrollText.length - 1,
+              eny: y + ROW_HEIGHT_INFO - 18 + moveEvent - scrollCount * 6 + 5,
             });
-          } else if (event.name === 'barlineon') {
-            barline = true;
-          } else if (event.name === 'barlineoff') {
-            barline = false;
-          } else if (event.name === 'branchStart') {
-            branchStart.position = event.position;
-            branchStart.ex = ex;
-          } else if (event.name === 'moveEvent') {
-            moveEvent = isNaN(event.value) ? moveEvent : event.value;
-          } else if (event.name === 'countChange') {
-            measureNumber = isNaN(event.value) ? measureNumber : event.value;
-          } else if (event.name === 'avoidtexton') {
-            avoidText = true;
-          } else if (event.name === 'avoidtextoff') {
-            avoidText = false;
+            scrollCount++;
           }
-        }
+        } else if (event.name === 'bpm') {
+          drawBarline(ex, event.position, true);
+          //drawPixelText(ctx, ex + 2, y + ROW_HEIGHT_INFO - 7, 'BPM ' + toFixedZero(event.value.toFixed(2)), '#00f', 'bottom', 'left');
 
-        if (!barlineDrawn) {
-          drawBarline(mx, 0, false);
-        } else if (branchStart.position !== undefined) {
-          drawBarline(branchStart.ex, branchStart.position, false);
+          const bpmText =
+            'BPM' + toFixedZero(Number.parseFloat(event.value).toFixed(2));
+          drawImageText(
+            ctx,
+            ex,
+            y + ROW_HEIGHT_INFO - 12 + moveEvent,
+            bpmText,
+            'bpm',
+          );
+          eventCover.push({
+            stx: ex + 1,
+            sty: y + ROW_HEIGHT_INFO - 12 + moveEvent,
+            enx: ex + 6 * bpmText.length - 1,
+            eny: y + ROW_HEIGHT_INFO - 12 + moveEvent + 5,
+          });
+        } else if (event.name === 'barlineon') {
+          barline = true;
+        } else if (event.name === 'barlineoff') {
+          barline = false;
+        } else if (event.name === 'branchStart') {
+          branchStart.position = event.position;
+          branchStart.ex = ex;
+        } else if (event.name === 'moveEvent') {
+          moveEvent = isNaN(event.value) ? moveEvent : event.value;
+        } else if (event.name === 'countChange') {
+          measureNumber = isNaN(event.value) ? measureNumber : event.value;
+        } else if (event.name === 'avoidtexton') {
+          avoidText = true;
+        } else if (event.name === 'avoidtextoff') {
+          avoidText = false;
         }
       }
+
+      if (!barlineDrawn) {
+        drawBarline(mx, 0, false);
+      } else if (branchStart.position !== undefined) {
+        drawBarline(branchStart.ex, branchStart.position, false);
+      }
     }
+  }
 
-    //============================================================================
-    // 4. Notes
+  //============================================================================
+  // 4. Notes
 
-    for (const bt of branchTypes) {
-      // Draw (backward scanning)
+  for (const bt of branchTypes) {
+    // Draw (backward scanning)
 
-      for (let ridx = rows.length; ridx-- > 0; ) {
-        const row = rows[ridx];
-        const measures = row.measures;
+    for (let ridx = rows.length; ridx-- > 0; ) {
+      const row = rows[ridx];
+      const measures = row.measures;
 
-        for (let midx = measures.length; midx-- > 0; ) {
-          const measure = measures[midx];
-          if (!measure.dataBranches.includes(bt)) {
+      for (let midx = measures.length; midx-- > 0; ) {
+        const measure = measures[midx];
+        if (!measure.dataBranches.includes(bt)) {
+          continue;
+        }
+        const rowYDelta = measure.dataBranches.indexOf(bt) * 24;
+
+        for (let didx = measure.data[bt].length; didx-- > 0; ) {
+          const note = measure.data[bt][didx];
+          if (!IS_POSITION_IN_ROW(row, midx, note.position)) {
             continue;
           }
-          const rowYDelta = measure.dataBranches.indexOf(bt) * 24;
+          const nBeat = GET_MEASURE_POS_BEAT_NOTE(
+            row.rowBeats[midx],
+            measure,
+            note.position,
+          );
 
-          for (let didx = measure.data[bt].length; didx-- > 0; ) {
-            const note = measure.data[bt][didx];
-            if (!IS_POSITION_IN_ROW(row, midx, note.position)) {
-              continue;
-            }
-            const nBeat = GET_MEASURE_POS_BEAT_NOTE(
-              row.rowBeats[midx],
-              measure,
-              note.position,
-            );
+          let longEnd = null;
 
-            let longEnd = null;
+          // look up the parsed results for roll & balloon
+          if (isRollType(note.type)) {
+            const rollEnd = note.end;
+            if (rollEnd === undefined) {
+              longEnd = [
+                undefined,
+                undefined,
+                true,
+              ];
+            } else {
+              const measureE = course.measures[rollEnd.midx];
+              const positionE = rollEnd.note.position;
+              const posRmidxE = midxToPosRmidx[rollEnd.midx];
+              const rmidxE =
+                posRmidxE.findLast((x) => x[0] <= positionE) || posRmidxE[0];
+              const ridxE = rmidxE[1];
+              const midxE = rmidxE[2];
 
-            // look up the parsed results for roll & balloon
-            if (isRollType(note.type)) {
-              const rollEnd = note.end;
-              if (rollEnd === undefined) {
+              const omitE = rollEnd.note.type !== 'end'; // omit forced roll ends for clarity
+              const rowE = rows[ridxE];
+              const nBeatE = GET_MEASURE_POS_BEAT_NOTE(
+                rowE.rowBeats[midxE],
+                measureE,
+                positionE,
+              );
+              if (ridxE > 0 && nBeatE === 0) {
                 longEnd = [
-                  undefined,
-                  undefined,
-                  true,
+                  ridxE - 1,
+                  rows[ridxE - 1].totalBeat,
+                  omitE,
                 ];
               } else {
-                const measureE = course.measures[rollEnd.midx];
-                const positionE = rollEnd.note.position;
-                const posRmidxE = midxToPosRmidx[rollEnd.midx];
-                const rmidxE =
-                  posRmidxE.findLast((x) => x[0] <= positionE) || posRmidxE[0];
-                const ridxE = rmidxE[1];
-                const midxE = rmidxE[2];
-
-                const omitE = rollEnd.note.type !== 'end'; // omit forced roll ends for clarity
-                const rowE = rows[ridxE];
-                const nBeatE = GET_MEASURE_POS_BEAT_NOTE(
-                  rowE.rowBeats[midxE],
-                  measureE,
-                  positionE,
-                );
-                if (ridxE > 0 && nBeatE === 0) {
-                  longEnd = [
-                    ridxE - 1,
-                    rows[ridxE - 1].totalBeat,
-                    omitE,
-                  ];
-                } else {
-                  longEnd = [
-                    ridxE,
-                    nBeatE,
-                    omitE,
-                  ];
-                }
+                longEnd = [
+                  ridxE,
+                  nBeatE,
+                  omitE,
+                ];
               }
             }
+          }
 
-            // Hand
-            switch (note.handType) {
-              case 'hand':
-                drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'hand');
-                break;
+          // Hand
+          switch (note.handType) {
+            case 'hand':
+              drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'hand');
+              break;
 
-              case 'handBig':
-                drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'bigHand');
-                break;
-            }
+            case 'handBig':
+              drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'bigHand');
+              break;
+          }
 
-            // Note
-            switch (note.type) {
-              case 'don':
-                drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'don');
-                break;
+          // Note
+          switch (note.type) {
+            case 'don':
+              drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'don');
+              break;
 
-              case 'kat':
-                drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'kat');
-                break;
+            case 'kat':
+              drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'kat');
+              break;
 
-              case 'donBig':
-                drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'bigDon');
-                break;
+            case 'donBig':
+              drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'bigDon');
+              break;
 
-              case 'katBig':
-                drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'bigKat');
-                break;
+            case 'katBig':
+              drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'bigKat');
+              break;
 
-              case 'renda':
-                drawRendaSprite(
-                  ctx,
-                  rows,
-                  bt,
-                  ridx,
-                  nBeat,
-                  longEnd[0],
-                  longEnd[1],
-                  longEnd[2],
-                  'roll',
-                );
-                break;
+            case 'renda':
+              drawRendaSprite(
+                ctx,
+                rows,
+                bt,
+                ridx,
+                nBeat,
+                longEnd[0],
+                longEnd[1],
+                longEnd[2],
+                'roll',
+              );
+              break;
 
-              case 'rendaBig':
-                drawRendaSprite(
-                  ctx,
-                  rows,
-                  bt,
-                  ridx,
-                  nBeat,
-                  longEnd[0],
-                  longEnd[1],
-                  longEnd[2],
-                  'bigRoll',
-                );
-                break;
+            case 'rendaBig':
+              drawRendaSprite(
+                ctx,
+                rows,
+                bt,
+                ridx,
+                nBeat,
+                longEnd[0],
+                longEnd[1],
+                longEnd[2],
+                'bigRoll',
+              );
+              break;
 
-              case 'balloon':
-                drawBalloonSprite(
-                  ctx,
-                  rows,
-                  bt,
-                  ridx,
-                  nBeat,
-                  longEnd[0],
-                  longEnd[1],
-                  longEnd[2],
-                  note.count,
-                );
-                break;
+            case 'balloon':
+              drawBalloonSprite(
+                ctx,
+                rows,
+                bt,
+                ridx,
+                nBeat,
+                longEnd[0],
+                longEnd[1],
+                longEnd[2],
+                note.count,
+              );
+              break;
 
-              case 'balloonEx':
-                drawBalloonSprite(
-                  ctx,
-                  rows,
-                  bt,
-                  ridx,
-                  nBeat,
-                  longEnd[0],
-                  longEnd[1],
-                  longEnd[2],
-                  note.count,
-                  true,
-                  chart.headers.spRoll,
-                );
-                break;
+            case 'balloonEx':
+              drawBalloonSprite(
+                ctx,
+                rows,
+                bt,
+                ridx,
+                nBeat,
+                longEnd[0],
+                longEnd[1],
+                longEnd[2],
+                note.count,
+                true,
+                chart.headers.spRoll,
+              );
+              break;
 
-              case 'mine':
-                drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'bomb');
-                break;
+            case 'mine':
+              drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'bomb');
+              break;
 
-              case 'fuse':
-                drawFuseSprite(
-                  ctx,
-                  rows,
-                  bt,
-                  ridx,
-                  nBeat,
-                  longEnd[0],
-                  longEnd[1],
-                  longEnd[2],
-                  note.count,
-                );
-                break;
+            case 'fuse':
+              drawFuseSprite(
+                ctx,
+                rows,
+                bt,
+                ridx,
+                nBeat,
+                longEnd[0],
+                longEnd[1],
+                longEnd[2],
+                note.count,
+              );
+              break;
 
-              case 'adlib':
-                drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'adlib');
-                break;
+            case 'adlib':
+              drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'adlib');
+              break;
 
-              case 'kadon':
-                drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'purple');
-                break;
-            }
+            case 'kadon':
+              drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'purple');
+              break;
+          }
 
-            // Overlay text
-            switch (note.handType) {
-              case 'handBig':
-                drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'bigHandText');
-                break;
-            }
+          // Overlay text
+          switch (note.handType) {
+            case 'handBig':
+              drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'bigHandText');
+              break;
           }
         }
       }
     }
-
-    //document.body.removeChild($canvas);
-    return $canvas;
-  } catch (e) {
-    //document.body.removeChild($canvas);
-    throw e;
   }
+
+  //document.body.removeChild($canvas);
+  return $canvas;
 }
 
 export async function initUsedSprite() {

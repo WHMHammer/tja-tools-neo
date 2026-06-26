@@ -249,7 +249,7 @@ class I18n {
   // 获取翻译文本
   t(key) {
     const translation = this.translations[this.currentLanguage];
-    return translation && translation[key] ? translation[key] : key;
+    return translation?.[key] ?? key;
   }
 
   // 更新DOM中所有带有data-i18n属性的元素
