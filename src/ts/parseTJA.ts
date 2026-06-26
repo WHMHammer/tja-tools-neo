@@ -155,7 +155,9 @@ function getNotes(data, rollStates, balloon, midx, currentBranch) {
     }
 
     if (isRollType(note.type)) {
-      if (rollStates.roll[currentBranch] !== null) continue;
+      if (rollStates.roll[currentBranch] !== null) {
+        continue;
+      }
       rollStates.roll[currentBranch] = {
         note,
         midx,
@@ -166,7 +168,9 @@ function getNotes(data, rollStates, balloon, midx, currentBranch) {
         const balloonBranch = balloon.type === 0 ? 'all' : currentBranch;
         note.count =
           balloon[balloonBranch][rollStates.balloonOffset[balloonBranch]++];
-        if (note.count === undefined) note.count = 0;
+        if (note.count === undefined) {
+          note.count = 0;
+        }
       }
     } else if (
       note.type !== 'blank'
@@ -187,7 +191,9 @@ function getNotes(data, rollStates, balloon, midx, currentBranch) {
       rollStates.roll[currentBranch] = null;
     }
 
-    if (note.type !== 'blank' && note.type !== 'end') notes.push(note);
+    if (note.type !== 'blank' && note.type !== 'end') {
+      notes.push(note);
+    }
   }
   return notes;
 }
@@ -264,7 +270,9 @@ function parseLine(line) {
   function trimComment(str) {
     return str.replace(/\/\/.*/, '').trim();
   }
-  if (trimComment(line) === '') return null;
+  if (trimComment(line) === '') {
+    return null;
+  }
 
   // header
   if ((match = line.match(/^(\.?[A-Z0-9_]+):(.*)/i))) {
@@ -322,7 +330,7 @@ function getCourse(tjaHeaders, lines) {
   }
 
   function setHeaderBalloon(branch, value) {
-    if (headers.balloon === undefined)
+    if (headers.balloon === undefined) {
       headers.balloon = {
         'N': [],
         'E': [],
@@ -330,6 +338,7 @@ function getCourse(tjaHeaders, lines) {
         all: [],
         type: 0,
       };
+    }
     headers.balloon[branch] = value;
     switch (branch) {
       case 'N':
@@ -470,7 +479,9 @@ function getCourse(tjaHeaders, lines) {
         }
 
         case 'LEVEL':
-          if (line.value !== null) setHeaderValue('level', line.value);
+          if (line.value !== null) {
+            setHeaderValue('level', line.value);
+          }
           break;
 
         case 'BALLOON':
@@ -550,7 +561,9 @@ function getCourse(tjaHeaders, lines) {
 
         case 'TTROWBEAT': {
           const ttRowBeat = Number.parseFloat(line.value);
-          if (ttRowBeat >= 1) setHeaderValue('ttRowBeat', ttRowBeat);
+          if (ttRowBeat >= 1) {
+            setHeaderValue('ttRowBeat', ttRowBeat);
+          }
           break;
         }
       }
@@ -583,8 +596,9 @@ function getCourse(tjaHeaders, lines) {
 					*/
           branching = true;
           currentBranch = 'N';
-          if (nBranchMeasures > nBranchMeasuresMax)
+          if (nBranchMeasures > nBranchMeasuresMax) {
             nBranchMeasuresMax = nBranchMeasures;
+          }
           midxBranchPoint = midxBranchPoint + nBranchMeasuresMax;
           nBranchMeasuresMax = nBranchMeasures = 0;
 
@@ -595,8 +609,9 @@ function getCourse(tjaHeaders, lines) {
         case 'BRANCHEND':
           branching = false;
           currentBranch = 'N';
-          if (nBranchMeasures > nBranchMeasuresMax)
+          if (nBranchMeasures > nBranchMeasuresMax) {
             nBranchMeasuresMax = nBranchMeasures;
+          }
           midxBranchPoint = midxBranchPoint + nBranchMeasuresMax;
           nBranchMeasuresMax = nBranchMeasures = 0;
 
@@ -609,8 +624,9 @@ function getCourse(tjaHeaders, lines) {
         case 'M':
           currentBranch = line.name;
           if (branching) {
-            if (nBranchMeasures > nBranchMeasuresMax)
+            if (nBranchMeasures > nBranchMeasuresMax) {
               nBranchMeasuresMax = nBranchMeasures;
+            }
             nBranchMeasures = 0;
             currentMeasure = getMeasure(midxBranchPoint);
           }
@@ -635,7 +651,9 @@ function getCourse(tjaHeaders, lines) {
           switch (line.name) {
             case 'MEASURE': {
               const divs = line.value.replace(/,$/, '').split(',');
-              if (divs.length === 0 || divs.length > 2) break;
+              if (divs.length === 0 || divs.length > 2) {
+                break;
+              }
 
               const div = divs[0].split('/').map((s) => s.trim());
               if (
@@ -646,11 +664,14 @@ function getCourse(tjaHeaders, lines) {
                   && div[1]
                   && !isNaN(div[1])
                 )
-              )
+              ) {
                 break;
+              }
               const measureDividend = Number.parseFloat(div[0], 10);
               const measureDivisor = Number.parseFloat(div[1], 10);
-              if (!isFinite(measureDividend / measureDivisor)) break;
+              if (!isFinite(measureDividend / measureDivisor)) {
+                break;
+              }
 
               let measureDividendNotes;
               let measureDivisorNotes;
@@ -667,12 +688,14 @@ function getCourse(tjaHeaders, lines) {
                     && divNote[1]
                     && !isNaN(divNote[1])
                   )
-                )
+                ) {
                   break;
+                }
                 measureDividendNotes = Number.parseFloat(divNote[0], 10);
                 measureDivisorNotes = Number.parseFloat(divNote[1], 10);
-                if (!isFinite(measureDividendNotes / measureDivisorNotes))
+                if (!isFinite(measureDividendNotes / measureDivisorNotes)) {
                   break;
+                }
               }
 
               currentMeasure.length = [
@@ -806,7 +829,7 @@ function getCourse(tjaHeaders, lines) {
   // After
   for (let i = 0; i < measures.length; i++) {
     // Calculate MEASURE progressively in case some measures were skipped
-    if (measures[i].length === null)
+    if (measures[i].length === null) {
       measures[i].length =
         i > 0
           ? measures[i - 1].length
@@ -814,7 +837,8 @@ function getCourse(tjaHeaders, lines) {
               4,
               4,
             ];
-    if (measures[i].lengthNotes === null)
+    }
+    if (measures[i].lengthNotes === null) {
       measures[i].lengthNotes =
         i > 0
           ? measures[i - 1].lengthNotes
@@ -822,6 +846,7 @@ function getCourse(tjaHeaders, lines) {
               4,
               4,
             ];
+    }
 
     // Add Zero
     const lengths = [];
@@ -1038,7 +1063,9 @@ export default function parseTJA(tja) {
   for (idx = 0; idx < lines.length; idx++) {
     const line = lines[idx];
     const parsed = parseLine(line);
-    if (parsed === null) continue;
+    if (parsed === null) {
+      continue;
+    }
 
     if (parsed.type === 'header' && parsed.scope === 'global') {
       switch (parsed.name) {
@@ -1121,9 +1148,10 @@ export default function parseTJA(tja) {
       }
     } else if (parsed.type === 'data') {
       if (!hasStarted) {
-        if (!parsed.data.match(/^[0-9]/))
+        if (!parsed.data.match(/^[0-9]/)) {
           // likely an incomplete header
           continue; // TODO: emit incomplete header warning
+        }
         // TODO: emit missing-#START warning
         hasStarted = true;
       }
@@ -1167,7 +1195,9 @@ export function getCourseLines(tja, chart, courseId) {
     const line = lines[i];
 
     const parsed = parseLine(line);
-    if (parsed === null) continue;
+    if (parsed === null) {
+      continue;
+    }
 
     if (parsed.type === 'header' && parsed.scope === 'global') {
       result.push(line);
@@ -1176,8 +1206,9 @@ export function getCourseLines(tja, chart, courseId) {
         const value = parseCourseValue(parsed.value);
         if (value !== null) {
           courseValue = value;
-          if (styleValues[courseValue] === undefined)
+          if (styleValues[courseValue] === undefined) {
             styleValues[courseValue] = styleValues[undefined];
+          }
           writeHeader = getWriteHeader();
           writeData = getWriteData();
         }
@@ -1188,10 +1219,16 @@ export function getCourseLines(tja, chart, courseId) {
           writeData = getWriteData();
         }
       }
-      if (writeHeader) result.push(line);
+      if (writeHeader) {
+        result.push(line);
+      }
     } else if (parsed.type === 'command') {
-      if (writeData) result.push(line);
-    } else if (parsed.type === 'data' && writeData) result.push(line);
+      if (writeData) {
+        result.push(line);
+      }
+    } else if (parsed.type === 'data' && writeData) {
+      result.push(line);
+    }
   }
 
   return result.join('\n');
@@ -1205,7 +1242,9 @@ export function getEnabledBranch(chart, courseId) {
   ];
   const result = [];
   const course = chart.courses[courseId];
-  if (course === undefined) return result;
+  if (course === undefined) {
+    return result;
+  }
 
   for (const bt of branchTypes) {
     const enabled = false;

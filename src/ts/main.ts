@@ -80,7 +80,9 @@ const downloadStatisticsAsImage = async () => {
   }
 
   const statsEl = document.querySelector('.area-pages');
-  if (!statsEl) return;
+  if (!statsEl) {
+    return;
+  }
 
   const copiedstatsEl = statsEl.cloneNode(true);
   copiedstatsEl.style.position = 'fixed';
@@ -126,7 +128,9 @@ const downloadPreviewImage = async () => {
   }
 
   const dataUrl = $previewImg.src;
-  if (dataUrl === '') return;
+  if (dataUrl === '') {
+    return;
+  }
   if (
     ($previewImg.dataset.embedMode === 'Donscore')
     !== $embedDonscore.checked
@@ -182,10 +186,15 @@ function updateUi() {
   $('.area-pages .page').addClass('is-hidden');
   $(`.area-pages .page-${selectedPage}`).removeClass('is-hidden');
 
-  if (selectedPage === 'preview' && selectedDifficulty !== '') showPreview();
-  else hidePreview();
+  if (selectedPage === 'preview' && selectedDifficulty !== '') {
+    showPreview();
+  } else {
+    hidePreview();
+  }
 
-  if (selectedPage === 'statistics') showStatistics();
+  if (selectedPage === 'statistics') {
+    showStatistics();
+  }
 
   $('.controls-branch .button.is-active').removeClass('is-active');
   $(`.controls-branch .btn-branch-${selectedBranch.toLowerCase()}`).addClass(
@@ -198,9 +207,11 @@ function loadFile(type, blob) {
     type === 'zip'
     || type === 'application/zip'
     || type === 'application/x-zip-compressed'
-  )
+  ) {
     loadZip(blob);
-  else loadTja(blob);
+  } else {
+    loadTja(blob);
+  }
 }
 
 function loadTja(file) {
@@ -267,8 +278,12 @@ function processTja() {
 }
 
 async function showPreview() {
-  if (tjaParsed === null || tjaParsed.courses[selectedDifficulty] === undefined)
+  if (
+    tjaParsed === null
+    || tjaParsed.courses[selectedDifficulty] === undefined
+  ) {
     return;
+  }
 
   $('#tja-preview').remove();
   $previewImg.src = '';
@@ -306,7 +321,9 @@ $previewImg.addEventListener('load', () => {
 });
 
 $previewImg.addEventListener('error', () => {
-  if (!$previewImg.src || $previewImg.src === location.href) return;
+  if (!$previewImg.src || $previewImg.src === location.href) {
+    return;
+  }
 
   if ($previewCanvas !== null) {
     $('#tja-preview').remove();
@@ -320,8 +337,12 @@ $previewImg.addEventListener('error', () => {
 });
 
 function showStatistics() {
-  if (tjaParsed === null || tjaParsed.courses[selectedDifficulty] === undefined)
+  if (
+    tjaParsed === null
+    || tjaParsed.courses[selectedDifficulty] === undefined
+  ) {
     return;
+  }
 
   const enabledBranch = getEnabledBranch(tjaParsed, selectedDifficulty);
 
@@ -382,8 +403,9 @@ function buildStatisticsPage(data) {
     $('.stat-scorediff').text('');
   }
   let scoreShinOrInit = scoreShin;
-  if (scoreShin === undefined || scoreShin === null)
+  if (scoreShin === undefined || scoreShin === null) {
     scoreShinOrInit = scoreInit;
+  }
 
   $('.stat-level').text('★×' + course.headers.level);
 
@@ -453,12 +475,13 @@ function buildStatisticsPage(data) {
       }
     }
   }
-  if (bpmMin.toFixed(2) == bpmMax.toFixed(2))
+  if (bpmMin.toFixed(2) == bpmMax.toFixed(2)) {
     $('.stat-bpm').text(toFixedZero(bpmMax.toFixed(2)));
-  else
+  } else {
     $('.stat-bpm').text(
       toFixedZero(bpmMin.toFixed(2)) + '-' + toFixedZero(bpmMax.toFixed(2)),
     );
+  }
 
   $('.stat-don-small').text(stats.notes[0]);
   $('.stat-don-big').text(stats.notes[2]);
@@ -685,7 +708,9 @@ editorLiveOnChange();
 $editorLive.addEventListener('change', editorLiveOnChange);
 
 $rendaHead.on('click', () => {
-  if (selectedDifficulty === '') return;
+  if (selectedDifficulty === '') {
+    return;
+  }
 
   const data = analyseChart(tjaParsed, selectedDifficulty, selectedBranch);
   const { statistics: stats, graph } = data;
@@ -761,7 +786,9 @@ $('.btn-download').on('click', (evt) => {
 });
 
 $('.download-donscore .button').on('click', async (evt) => {
-  if (selectedDifficulty === '') return;
+  if (selectedDifficulty === '') {
+    return;
+  }
 
   const fh = await window.showSaveFilePicker({
     types: [
@@ -811,8 +838,9 @@ window.addEventListener('message', async (event) => {
     event.data
     && typeof event.data.type === 'string'
     && event.data.blob instanceof Blob
-  )
+  ) {
     loadFile(event.data.type, event.data.blob);
+  }
 });
 
 async function loadZip(blob) {
@@ -841,8 +869,9 @@ async function loadZipFromBlob(blob) {
     const tjaFiles = [];
 
     zip.forEach((relPath, file) => {
-      if (!file.dir && relPath.toLowerCase().endsWith('.tja'))
+      if (!file.dir && relPath.toLowerCase().endsWith('.tja')) {
         tjaFiles.push(relPath);
+      }
     });
 
     return {

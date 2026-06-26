@@ -61,10 +61,11 @@ export function convertToDonscore(chart, courseId) {
       const fixed48th = Math.abs((48 / measure.length[1]) * measure.length[0]);
       tempData[bt] = [];
       Object.assign(tempData[bt], measure.data[bt]); // shallow array copy to modify nDivisions
-      for (let j = 0; j < tempData[bt].length; ++j)
+      for (let j = 0; j < tempData[bt].length; ++j) {
         tempData[bt][j] = {
           ...tempData[bt][j],
         }; // shallow copy to modify position
+      }
       if (
         fixed48th > tempData[bt].nDivisions
         && fixed48th % tempData[bt].nDivisions === 0
@@ -93,9 +94,11 @@ export function convertToDonscore(chart, courseId) {
           index = note.position;
           rolling = true;
 
-          if (isBalloonType(note.type))
+          if (isBalloonType(note.type)) {
             margin = note.count.toString().length + 2; // `[@5`
-          else margin = 1; // `<`
+          } else {
+            margin = 1; // `<`
+          }
         } else if (note.type === 'end' || note.type === 'endForced') {
           marginDiff.push(margin - (note.position - index - 1)); // `[@5` - (between `[` & `]`), or (between line start & `]`)
           rolling = false;
@@ -194,8 +197,11 @@ export function convertToDonscore(chart, courseId) {
           let balloonCount = 0;
           if (isRollType(note.type)) {
             rolling = true;
-            if (isBalloonType(note.type)) balloonCount = note.count;
-            else balloonTextCount = 0;
+            if (isBalloonType(note.type)) {
+              balloonCount = note.count;
+            } else {
+              balloonTextCount = 0;
+            }
           } else if (note.type === 'end' || note.type === 'endForced') {
             tempData.push(note.type === 'end' ? endChar : '\\' + endChar);
             rolling = false;
@@ -273,7 +279,9 @@ export function convertToDonscore(chart, courseId) {
       for (let j = 0; j < converted[i][bt].length; j++) {
         let ch = converted[i][bt][j];
         const isForcedEnd = ch[0] === '\\';
-        if (isForcedEnd) ch = ch.substring(1);
+        if (isForcedEnd) {
+          ch = ch.substring(1);
+        }
 
         if (rollEndSymbol.includes(ch) && (i > 0 || j > 0)) {
           if (j === 0) {
@@ -294,7 +302,9 @@ export function convertToDonscore(chart, courseId) {
             converted[i][bt][j] = ' ';
             converted[i][bt][j - 1] = ch;
           }
-          if (isForcedEnd) converted[i][bt].splice(j--, 1);
+          if (isForcedEnd) {
+            converted[i][bt].splice(j--, 1);
+          }
         }
       }
     }
@@ -375,7 +385,9 @@ export function convertToDonscore(chart, courseId) {
       measure.length[1],
       measure.length[0],
     ];
-    if (nowMeter[0] < 0) nowMeter = nowMeter.map((x) => -x);
+    if (nowMeter[0] < 0) {
+      nowMeter = nowMeter.map((x) => -x);
+    }
     let nowBeatChar = converted[m][nowBranch[0]].length / measure.length[0];
     if (!isFinite(nowBeatChar)) {
       nowBeatChar = converted[m][nowBranch[0]].length;

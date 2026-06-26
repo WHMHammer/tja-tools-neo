@@ -259,8 +259,11 @@ function getStatistics(course) {
 
     if (scCurEvent && scCurEvent.beat <= note.beat) {
       do {
-        if (scCurEvent.type === 'gogoStart') scGogo = true;
-        else if (scCurEvent.type === 'gogoEnd') scGogo = false;
+        if (scCurEvent.type === 'gogoStart') {
+          scGogo = true;
+        } else if (scCurEvent.type === 'gogoEnd') {
+          scGogo = false;
+        }
 
         scCurEventIdx += 1;
         scCurEvent = course.events[scCurEventIdx];
@@ -270,7 +273,9 @@ function getStatistics(course) {
     const v1 = typeNote.indexOf(note.type);
     const isBig = note.type.endsWith('Big');
     if (v1 !== -1) {
-      if (i === 0) start = note.time;
+      if (i === 0) {
+        start = note.time;
+      }
       end = note.time;
 
       notes[v1] += 1;
@@ -294,8 +299,12 @@ function getStatistics(course) {
                   : 8);
 
       let noteScore = Math.floor(noteScoreBase / 10) * 10;
-      if (scGogo) noteScore = Math.floor((noteScore * 1.2) / 10) * 10;
-      if (isBig) noteScore *= 2;
+      if (scGogo) {
+        noteScore = Math.floor((noteScore * 1.2) / 10) * 10;
+      }
+      if (isBig) {
+        noteScore *= 2;
+      }
 
       scPotential += noteScore;
 
@@ -405,7 +414,9 @@ function getGraph(course) {
     if (v1 !== -1) {
       while ((data.length + 1) * timeframe <= note.time) {
         const density = (datum.don + datum.kat + datum.kadon) / timeframe;
-        if (max < density) max = density;
+        if (max < density) {
+          max = density;
+        }
 
         data.push(datum);
         datum = {
@@ -415,9 +426,13 @@ function getGraph(course) {
         };
       }
 
-      if (note.type === 'don' || note.type === 'donBig') datum.don += 1;
-      else if (note.type === 'kat' || note.type === 'katBig') datum.kat += 1;
-      else if (note.type === 'kadon') datum.kadon += 1;
+      if (note.type === 'don' || note.type === 'donBig') {
+        datum.don += 1;
+      } else if (note.type === 'kat' || note.type === 'katBig') {
+        datum.kat += 1;
+      } else if (note.type === 'kadon') {
+        datum.kadon += 1;
+      }
     }
   }
 
@@ -712,12 +727,13 @@ export function predictScore(stats, course, gogoFloor, scoreSystem) {
     );
 
   //Shiage
-  if (scoreSystem === 'CS')
+  if (scoreSystem === 'CS') {
     return [
       scoreInit,
       scoreDiff,
       scoreShin,
     ];
+  }
   // if (scoreSystem === 'AC16Old')
   return [
     scoreInit,

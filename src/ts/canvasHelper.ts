@@ -53,15 +53,21 @@ export function drawLine(
         const p1 = coverPoints[i];
         const p2 = coverPoints[(i + 1) % coverPoints.length];
         const intersection = getLineIntersection(points[0], points[1], p1, p2);
-        if (intersection) intersections.push(intersection);
+        if (intersection) {
+          intersections.push(intersection);
+        }
       }
-      if (intersections.length <= 1) return;
+      if (intersections.length <= 1) {
+        return;
+      }
       intersections.sort((a, b) => a.t - b.t);
       const avoided = [
         intersections[0],
         intersections[intersections.length - 1],
       ];
-      if (avoided[1].t <= 0 || avoided[0].t >= 1) return;
+      if (avoided[1].t <= 0 || avoided[0].t >= 1) {
+        return;
+      }
       avoideds.push(avoided);
     });
 
@@ -75,9 +81,10 @@ export function drawLine(
     ctx.moveTo(sx, sy); // |t
 
     avoideds.forEach((points) => {
-      if (points[1].t <= t)
+      if (points[1].t <= t) {
         // [ ] t
         return;
+      }
       if (points[0].t > t) {
         // t [ ] => --[t ]
         t = points[0].t;

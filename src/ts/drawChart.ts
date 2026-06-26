@@ -194,7 +194,9 @@ function drawLongOnRow(ctx, rows, bt, ridx, sBeat, eBeat, type) {
 }
 
 function drawLongSprite(ctx, rows, bt, sRow, sBeat, eRow, eBeat, type) {
-  if (eRow === undefined) eRow = rows.length - 1;
+  if (eRow === undefined) {
+    eRow = rows.length - 1;
+  }
 
   if (sRow === eRow) {
     drawLongOnRow(ctx, rows, bt, sRow, sBeat, eBeat, type);
@@ -236,7 +238,9 @@ function drawRendaSprite(
       ? rows[eRow].measures.length - 1
       : GET_BEAT_ROW_MIDX(rows[eRow], eBeat);
     const bidxE = rows[eRow].measures[midxE].dataBranches.indexOf(bt);
-    if (bidxE >= 0) drawNoteSprite(ctx, eRow, bidxE * 24, eBeat, type + 'End');
+    if (bidxE >= 0) {
+      drawNoteSprite(ctx, eRow, bidxE * 24, eBeat, type + 'End');
+    }
   }
   drawLongSprite(ctx, rows, bt, sRow, sBeat, eRow, eBeat, type + 'Middle');
   drawNoteSprite(
@@ -283,7 +287,9 @@ function drawBalloonSprite(
       ? rows[eRow].measures.length - 1
       : GET_BEAT_ROW_MIDX(rows[eRow], eBeat);
     const bidxE = rows[eRow].measures[midxE].dataBranches.indexOf(bt);
-    if (bidxE >= 0) drawNoteSprite(ctx, eRow, bidxE * 24, eBeat, 'spRollEnd');
+    if (bidxE >= 0) {
+      drawNoteSprite(ctx, eRow, bidxE * 24, eBeat, 'spRollEnd');
+    }
   }
   drawLongSprite(ctx, rows, bt, sRow, sBeat, eRow, eBeat, 'spRollMiddle');
   drawNoteSprite(ctx, sRow, bidx * 24, sBeat, 'spRollStart', 'center', 'right');
@@ -318,7 +324,9 @@ function drawFuseSprite(
       ? rows[eRow].measures.length - 1
       : GET_BEAT_ROW_MIDX(rows[eRow], eBeat);
     const bidxE = rows[eRow].measures[midxE].dataBranches.indexOf(bt);
-    if (bidxE >= 0) drawNoteSprite(ctx, eRow, bidxE * 24, eBeat, 'fuseEnd');
+    if (bidxE >= 0) {
+      drawNoteSprite(ctx, eRow, bidxE * 24, eBeat, 'fuseEnd');
+    }
   }
   drawLongSprite(ctx, rows, bt, sRow, sBeat, eRow, eBeat, 'fuseMiddle');
   drawNoteSprite(ctx, sRow, bidx * 24, sBeat, 'fuse');
@@ -378,8 +386,9 @@ export default function (chart, courseId) {
       ]);
       rowTemp.push(measure);
       rowBeats.push(rowBeatM + measureBeatPushed);
-      if (measure.dataBranches.length > nPrevBranches)
+      if (measure.dataBranches.length > nPrevBranches) {
         nPrevBranches = measure.dataBranches.length;
+      }
 
       const moveLineM = measure.properties.moveLines.findLast(
         (e) =>
@@ -387,7 +396,9 @@ export default function (chart, courseId) {
           && e.position < positionEnd
           && !isNaN(e.value),
       );
-      if (moveLineM !== undefined) moveLineTemp = moveLineM.value;
+      if (moveLineM !== undefined) {
+        moveLineTemp = moveLineM.value;
+      }
     };
 
     // calculate row wrap
@@ -405,17 +416,19 @@ export default function (chart, courseId) {
     }
     // auto wrap
     if (rowBeatM + measureBeatTail >= ttRowBeat + 1 / BEAT_WIDTH) {
-      if (rowBeatM > 0)
+      if (rowBeatM > 0) {
         rowBeatWrap = Math.min(rowBeatWrap, rowBeatM); // whole-measure wrap
-      else {
+      } else {
         const measureMajorTail =
           Math.floor(ttRowBeat - rowBeatM) / Math.abs(measure.length[1]);
-        if (measureMajorTail >= 1)
+        if (measureMajorTail >= 1) {
           rowBeatWrap = Math.min(
             rowBeatWrap,
             rowBeatM + measureMajorTail * Math.abs(measure.length[1]),
           ); // soft mid-measure wrap at major grid
-        else rowBeatWrap = Math.min(rowBeatWrap, ttRowBeat); // hard mid-measure wrap
+        } else {
+          rowBeatWrap = Math.min(rowBeatWrap, ttRowBeat); // hard mid-measure wrap
+        }
       }
     }
 
@@ -447,16 +460,21 @@ export default function (chart, courseId) {
       ];
       nPrevBranches = 0;
       moveLineTemp = 0;
-      if (measureBeatWrap > 0) positionBegin = positionEnd;
-      else positionBegin = 0;
+      if (measureBeatWrap > 0) {
+        positionBegin = positionEnd;
+      } else {
+        positionBegin = 0;
+      }
       positionEnd = Number.POSITIVE_INFINITY;
-      if (!wrapAtEnd) --midx; // continue process at next row
+      if (!wrapAtEnd) {
+        --midx; // continue process at next row
+      }
     } else {
       pushMeasure(measureBeat); // with unbounded end
     }
   }
 
-  if (rowTemp.length)
+  if (rowTemp.length) {
     rows.push({
       totalBeat: rowBeats.pop(),
       rowBeats,
@@ -466,6 +484,7 @@ export default function (chart, courseId) {
       nBranches: nPrevBranches,
       moveLine: moveLineTemp,
     });
+  }
 
   rowDeltaSums.length = 0;
   rowDeltaSums.push(0);
@@ -779,7 +798,9 @@ export default function (chart, courseId) {
         // Go-go time
         for (let i = 0; i < measure.events.length; i++) {
           const event = measure.events[i];
-          if (!IS_POSITION_IN_ROW(row, midx, event.position)) continue;
+          if (!IS_POSITION_IN_ROW(row, midx, event.position)) {
+            continue;
+          }
           const eBeat = GET_MEASURE_POS_BEAT(
             row.rowBeats[midx],
             measure,
@@ -844,7 +865,9 @@ export default function (chart, courseId) {
               ? measure.nBeats
               : (i / Math.abs(measure.length[1])) * 2;
           const beat = row.rowBeats[midx] + subBeat;
-          if (!(beat >= 0 && beat <= row.totalBeat)) continue;
+          if (!(beat >= 0 && beat <= row.totalBeat)) {
+            continue;
+          }
           const subx = GET_BEAT_X(beat);
           const style =
             '#ffffff' + (i % 2 === 0 || i >= nGridsBody ? '7f' : '3f');
@@ -1001,7 +1024,9 @@ export default function (chart, courseId) {
           .map((e) => e.e);
 
         for (const event of events) {
-          if (!IS_POSITION_IN_ROW(row, midx, event.position)) continue;
+          if (!IS_POSITION_IN_ROW(row, midx, event.position)) {
+            continue;
+          }
           const eBeat = GET_MEASURE_POS_BEAT(
             row.rowBeats[midx],
             measure,
@@ -1134,7 +1159,9 @@ export default function (chart, courseId) {
 
           for (let didx = measure.data[bt].length; didx-- > 0; ) {
             const note = measure.data[bt][didx];
-            if (!IS_POSITION_IN_ROW(row, midx, note.position)) continue;
+            if (!IS_POSITION_IN_ROW(row, midx, note.position)) {
+              continue;
+            }
             const nBeat = GET_MEASURE_POS_BEAT_NOTE(
               row.rowBeats[midx],
               measure,

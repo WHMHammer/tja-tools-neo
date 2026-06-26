@@ -45,8 +45,11 @@ export function bsearchLeftmost(keyfunc, max, target) {
   let r = max;
   while (l < r) {
     const m = l + Math.floor((r - l) / 2);
-    if (keyfunc(m) < target) l = m + 1;
-    else r = m;
+    if (keyfunc(m) < target) {
+      l = m + 1;
+    } else {
+      r = m;
+    }
   }
   return l;
 }
