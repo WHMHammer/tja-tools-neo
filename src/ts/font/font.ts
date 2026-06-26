@@ -77,7 +77,7 @@ export function getTextPositionY(fontSetting, hasSubtitle, hasMaker) {
   return result;
 }
 
-export function getUraSymbol(headerFont) {
+export function getUraSymbol() {
   const result = {
     title: '(裏譜面)',
     level: '裏',

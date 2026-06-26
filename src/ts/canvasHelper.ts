@@ -271,7 +271,7 @@ export function drawImageText(ctx, x, y, text, type) {
 }
 
 export function initSprites() {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const data = require('./sprite/sprite.ts').default;
     const outdata = {};
     let total = 0;

@@ -578,7 +578,7 @@ function buildStatisticsPage(data) {
     'kat',
   ])(graph.data);
 
-  x.domain(layers[0].map((d, idx) => idx));
+  x.domain(layers[0].map((_d, idx) => idx));
   y.domain([
     0,
     Math.max(1, Math.ceil(graph.max / 5)) * 5,
@@ -599,7 +599,7 @@ function buildStatisticsPage(data) {
     .attr('class', 'layer')
     .style(
       'fill',
-      (d, i) =>
+      (_d, i) =>
         [
           '#f0f',
           '#f00',
@@ -612,7 +612,7 @@ function buildStatisticsPage(data) {
     .data((d) => d)
     .enter()
     .append('rect')
-    .attr('x', (d, idx) => x(idx))
+    .attr('x', (_d, idx) => x(idx))
     .attr('y', (d) => y(d[1] / graph.timeframe))
     .attr(
       'height',
@@ -777,7 +777,7 @@ $('.controls-score-system .radio').on('click', (evt) => {
   updateUi();
 });
 
-$('.btn-download').on('click', (evt) => {
+$('.btn-download').on('click', () => {
   if (selectedPage === 'preview') {
     downloadPreviewImage();
   } else {
@@ -785,7 +785,7 @@ $('.btn-download').on('click', (evt) => {
   }
 });
 
-$('.download-donscore .button').on('click', async (evt) => {
+$('.download-donscore .button').on('click', async () => {
   if (selectedDifficulty === '') {
     return;
   }
@@ -816,7 +816,7 @@ window.onload = async () => {
   await loadAllFonts();
 };
 
-$('.btn-unique').on('click', (evt) => {
+$('.btn-unique').on('click', () => {
   downloadNewUniqueId();
 });
 
@@ -889,7 +889,7 @@ function showZipFileSelector(zip, tjaFiles) {
     '<option value="">-- Select a TJA file --</option>';
 
   // Add options for each TJA file
-  tjaFiles.forEach((tjaFile, index) => {
+  tjaFiles.forEach((tjaFile) => {
     const option = document.createElement('option');
     option.value = tjaFile;
     option.textContent = tjaFile;
@@ -901,7 +901,7 @@ function showZipFileSelector(zip, tjaFiles) {
 
   // ZIP file selector event handlers
   $loadZipTja.off('click');
-  $loadZipTja.on('click', async (evt) => {
+  $loadZipTja.on('click', async () => {
     const selectedFile = $zipTjaSelect.first().value;
     if (selectedFile === '') {
       alert('Please select a TJA file.');
@@ -939,7 +939,7 @@ async function loadTjaFileFromZip(zip, filePath) {
   }
 }
 
-$cancelZip.on('click', (evt) => {
+$cancelZip.on('click', () => {
   hideZipFileSelector();
 });
 

@@ -634,7 +634,7 @@ export default function (chart, courseId) {
       }
     }
 
-    const uraSymbols = getUraSymbol(chart.headers.font.toLowerCase());
+    const uraSymbols = getUraSymbol(/* chart.headers.font.toLowerCase() */);
     const titleUraSymbol = uraSymbols.title;
     const levelUraSymbol = uraSymbols.level;
 
