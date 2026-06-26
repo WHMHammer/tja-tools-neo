@@ -141,9 +141,9 @@ function getLineIntersection(p0, p1, p2, p3) {
   return null;
 }
 
-function distance(p1, p2) {
-  return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
-}
+// function distance(p1, p2) {
+//   return Math.sqrt((p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2);
+// }
 
 /*
 export function drawLine(ctx, sx, sy, ex, ey, width, stroke, eventCover = null, avoidText = false) {
@@ -277,7 +277,7 @@ export function initSprites() {
     let total = 0;
 
     for (const type in data) {
-      for (const key in data[type]) {
+      for (const _key in data[type]) {
         total++;
       }
     }

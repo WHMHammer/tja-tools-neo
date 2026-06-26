@@ -630,7 +630,7 @@ function copyRendaText(rendas, rendaExtends, rendaLength) {
   const groupMax = rendaExtends.reduce((a, b) => Math.max(a, b.rendaGroup), -1);
 
   const markNegative = (x) => `(${x})`;
-  const markBig = (x) => `SIZE(16){${x}}`;
+  // const markBig = (x) => `SIZE(16){${x}}`;
   const markInGogo = (x) => `''${x}''`;
   const markNone = (x) => x;
 
@@ -713,7 +713,7 @@ $rendaHead.on('click', () => {
   }
 
   const data = analyseChart(tjaParsed, selectedDifficulty, selectedBranch);
-  const { statistics: stats, graph } = data;
+  const { statistics: stats } = data;
   copyRendaText(stats.rendas, stats.rendaExtends, stats.rendaLength);
 });
 

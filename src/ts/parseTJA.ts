@@ -198,21 +198,21 @@ function getNotes(data, rollStates, balloon, midx, currentBranch) {
 }
 
 function parseLine(line) {
-  const HeaderGlobal = [
-    'TITLE',
-    'SUBTITLE',
-    'BPM',
-    'WAVE',
-    'OFFSET',
-    'DEMOSTART',
-    'GENRE',
-    'MAKER',
-    'FONT',
-    'SPROLL',
-    'LEVELCOLOR',
-    'LEVELURA',
-    'TITLECOLOR',
-  ];
+  // const HeaderGlobal = [
+  //   'TITLE',
+  //   'SUBTITLE',
+  //   'BPM',
+  //   'WAVE',
+  //   'OFFSET',
+  //   'DEMOSTART',
+  //   'GENRE',
+  //   'MAKER',
+  //   'FONT',
+  //   'SPROLL',
+  //   'LEVELCOLOR',
+  //   'LEVELURA',
+  //   'TITLECOLOR',
+  // ];
 
   const HeaderCourse = [
     'COURSE',
@@ -232,35 +232,35 @@ function parseLine(line) {
     'TTROWBEAT',
   ];
 
-  const Command = [
-    'START',
-    'END',
-    'GOGOSTART',
-    'GOGOEND',
-    'MEASURE',
-    'SCROLL',
-    'BPMCHANGE',
-    'DELAY',
-    'BRANCHSTART',
-    'BRANCHEND',
-    'SECTION',
-    'N',
-    'E',
-    'M',
-    'LEVELHOLD',
-    'BMSCROLL',
-    'HBSCROLL',
-    'BARLINEOFF',
-    'BARLINEON',
+  // const Command = [
+  //   'START',
+  //   'END',
+  //   'GOGOSTART',
+  //   'GOGOEND',
+  //   'MEASURE',
+  //   'SCROLL',
+  //   'BPMCHANGE',
+  //   'DELAY',
+  //   'BRANCHSTART',
+  //   'BRANCHEND',
+  //   'SECTION',
+  //   'N',
+  //   'E',
+  //   'M',
+  //   'LEVELHOLD',
+  //   'BMSCROLL',
+  //   'HBSCROLL',
+  //   'BARLINEOFF',
+  //   'BARLINEON',
 
-    'TTBREAK',
-    'NEWLINE',
-    'MOVEEVENT',
-    'COUNTCHANGE',
-    'AVOIDTEXTOFF',
-    'AVOIDTEXTON',
-    'MOVELINE',
-  ];
+  //   'TTBREAK',
+  //   'NEWLINE',
+  //   'MOVEEVENT',
+  //   'COUNTCHANGE',
+  //   'AVOIDTEXTOFF',
+  //   'AVOIDTEXTON',
+  //   'MOVELINE',
+  // ];
 
   let match;
 
@@ -386,12 +386,8 @@ function getCourse(tjaHeaders, lines) {
 
   // Process lines
   let hasStarted = false;
-  const measureProperties = {};
   let measureData = '';
-  const measureEvents = [];
   let currentBranch = 'N';
-  const targetBranch = 'N';
-  const flagLevelhold = false;
   let branching = false;
   let midxBranchPoint = 0;
   let nBranchMeasures = 0;
@@ -1246,7 +1242,6 @@ export function getEnabledBranch(chart, courseId) {
   }
 
   for (const bt of branchTypes) {
-    const enabled = false;
     for (const m of course.measures) {
       if (m.branching && m.data[bt] != null) {
         result.push(bt);

@@ -78,7 +78,6 @@ export function convertToDonscore(chart, courseId) {
 
   // Add for Roll
   for (const bt of branchTypes) {
-    const balloonIdx = 0;
     for (let i = 0; i < newData.length; i++) {
       if (newData[i][bt] === null) {
         continue;
@@ -166,7 +165,6 @@ export function convertToDonscore(chart, courseId) {
     });
   }
   for (const bt of branchTypes) {
-    const balloonIdx = 0;
     let balloonText = '';
     let endChar = '';
     let balloonTextCount = 0;

@@ -42,7 +42,7 @@ const LINE_COLOR = {
 
 const BEAT_WIDTH = 48;
 
-const NOTE_RADIUS = 9;
+// const NOTE_RADIUS = 9;
 
 const rowDeltaSums = [];
 const getRowDeltaSums = (offset = -1) =>
@@ -112,10 +112,10 @@ function drawNoteSprite(
   drawSprite(ctx, x, y + yDelta, type, 'notes', alignY, alignX);
 }
 
-function drawHandSprite(ctx, row, yDelta, beat, type) {
-  const { x, y } = getNoteCenter(row, beat);
-  drawSprite(ctx, x, y + yDelta, type, 'notes', 'center', 'center');
-}
+// function drawHandSprite(ctx, row, yDelta, beat, type) {
+//   const { x, y } = getNoteCenter(row, beat);
+//   drawSprite(ctx, x, y + yDelta, type, 'notes', 'center', 'center');
+// }
 
 //==============================================================================
 // Long notes

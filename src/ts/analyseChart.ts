@@ -49,62 +49,40 @@ function convertToTimed(course, branchType) {
   const notes = [];
   let beat = 0;
   let absBeat = 0;
-  const balloon = 0;
-  const roll = false;
   const midxToNoteIdx = [];
 
   // Get Branch Data
   const newData = [];
-  const branchTypes = [
-    'N',
-    'E',
-    'M',
-  ];
-  const allBalloon = {
-    'N': {},
-    'E': {},
-    'M': {},
-  };
 
   for (let i = 0; i < course.measures.length; i++) {
-    let selected = branchType;
     let selData = '';
     const measure = course.measures[i];
 
     switch (branchType) {
       case 'N':
         if (measure.data['N'] != null) {
-          selected = 'N';
           selData = measure.data['N'];
         } else if (measure.data['E'] != null) {
-          selected = 'E';
           selData = measure.data['E'];
         } else if (measure.data['M'] != null) {
-          selected = 'M';
           selData = measure.data['M'];
         }
         break;
       case 'E':
         if (measure.data['E'] != null) {
-          selected = 'E';
           selData = measure.data['E'];
         } else if (measure.data['N'] != null) {
-          selected = 'N';
           selData = measure.data['N'];
         } else if (measure.data['M'] != null) {
-          selected = 'M';
           selData = measure.data['M'];
         }
         break;
       case 'M':
         if (measure.data['M'] != null) {
-          selected = 'M';
           selData = measure.data['M'];
         } else if (measure.data['E'] != null) {
-          selected = 'E';
           selData = measure.data['E'];
         } else if (measure.data['N'] != null) {
-          selected = 'N';
           selData = measure.data['N'];
         }
         break;
