@@ -378,9 +378,9 @@ function getCourse(tjaHeaders, lines) {
 
   // Process lines
   let hasStarted = false;
-  let measureProperties = {},
-    measureData = '',
-    measureEvents = [];
+  const measureProperties = {};
+  let measureData = '';
+  const measureEvents = [];
   let currentBranch = 'N';
   const targetBranch = 'N';
   const flagLevelhold = false;

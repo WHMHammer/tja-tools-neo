@@ -4,16 +4,16 @@ import { bsearchLeftmost } from './common';
 
 function pulseToTime(events, objects) {
   let bpm = 120;
-  let passedBeat = 0,
-    passedTime = 0;
-  let eidx = 0,
-    oidx = 0;
+  let passedBeat = 0;
+  let passedTime = 0;
+  let eidx = 0;
+  let oidx = 0;
 
   const times = [];
 
   while (oidx < objects.length) {
-    let event = events[eidx],
-      obj = objects[oidx];
+    let event = events[eidx];
+    const obj = objects[oidx];
 
     while (event && event.absBeat <= obj.absBeat) {
       if (event.type === 'delay') {
@@ -45,13 +45,13 @@ function pulseToTime(events, objects) {
 }
 
 function convertToTimed(course, branchType) {
-  const events = [],
-    notes = [];
-  let beat = 0,
-    absBeat = 0,
-    balloon = 0,
-    roll = false,
-    midxToNoteIdx = [];
+  const events = [];
+  const notes = [];
+  let beat = 0;
+  let absBeat = 0;
+  const balloon = 0;
+  const roll = false;
+  const midxToNoteIdx = [];
 
   // Get Branch Data
   const newData = [];
@@ -184,23 +184,23 @@ function getStatistics(course) {
   // potential score, score equations, recommended score variables
 
   const notes = [
-      0,
-      0,
-      0,
-      0,
-      0,
-    ],
-    rendas = [],
-    rendaExtends = [],
-    balloons = [];
-  let adlibs = 0,
-    mines = 0;
-  let start = 0,
-    end = 0,
-    combo = 0;
+    0,
+    0,
+    0,
+    0,
+    0,
+  ];
+  const rendas = [];
+  const rendaExtends = [];
+  const balloons = [];
+  let adlibs = 0;
+  let mines = 0;
+  let start = 0;
+  let end = 0;
+  let combo = 0;
   let rendaGroup = 0;
-  let scCurEventIdx = 0,
-    scCurEvent = course.events[scCurEventIdx];
+  let scCurEventIdx = 0;
+  let scCurEvent = course.events[scCurEventIdx];
   let scGogo = false;
   const scNotes = [
     [
@@ -237,13 +237,13 @@ function getStatistics(course) {
     ],
   ];
   const scBalloon = [
-      0,
-      0,
-    ],
-    scBalloonPop = [
-      0,
-      0,
-    ];
+    0,
+    0,
+  ];
+  const scBalloonPop = [
+    0,
+    0,
+  ];
   let scPotential = 0;
 
   const typeNote = [
@@ -379,18 +379,16 @@ function getStatistics(course) {
 function getGraph(course) {
   const data = [];
   let datum = {
-      don: 0,
-      kat: 0,
-      kadon: 0,
-    },
-    max = 0;
+    don: 0,
+    kat: 0,
+    kadon: 0,
+  };
+  let max = 0;
 
   const length =
-      course.notes.length === 0
-        ? 0
-        : course.notes[course.notes.length - 1].time,
-    dataCount = Math.max(1, Math.min(100, Math.ceil(length))),
-    timeframe = Math.max(1, length / dataCount);
+    course.notes.length === 0 ? 0 : course.notes[course.notes.length - 1].time;
+  const dataCount = Math.max(1, Math.min(100, Math.ceil(length)));
+  const timeframe = Math.max(1, length / dataCount);
 
   const typeNote = [
     'don',

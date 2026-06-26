@@ -346,16 +346,16 @@ export default function (chart, courseId) {
   //============================================================================
   // 1. Calculate canvas size, split measures into rows
 
-  const rows = [],
-    midxToPosRmidx = [];
-  let rowTemp = [],
-    rowBeats = [
-      0,
-    ];
+  const rows = [];
+  const midxToPosRmidx = [];
+  let rowTemp = [];
+  let rowBeats = [
+    0,
+  ];
   let nPrevBranches = 0;
   let moveLineTemp = 0;
-  let positionBegin = 0,
-    positionEnd = Number.POSITIVE_INFINITY; // for the first and last measures in a row
+  let positionBegin = 0;
+  let positionEnd = Number.POSITIVE_INFINITY; // for the first and last measures in a row
 
   for (let midx = 0; midx < course.measures.length; midx++) {
     const rowBeatM = rowBeats[rowBeats.length - 1];
@@ -770,8 +770,8 @@ export default function (chart, courseId) {
     let avoidText = true;
 
     for (let ridx = 0; ridx < rows.length; ridx++) {
-      const row = rows[ridx],
-        measures = row.measures;
+      const row = rows[ridx];
+      const measures = row.measures;
 
       for (let midx = 0; midx < measures.length; midx++) {
         const measure = measures[midx];
@@ -822,8 +822,8 @@ export default function (chart, courseId) {
     }
 
     for (let ridx = 0; ridx < rows.length; ridx++) {
-      const row = rows[ridx],
-        measures = row.measures;
+      const row = rows[ridx];
+      const measures = row.measures;
       const eventCover = [];
 
       const y = GET_ROW_Y(ridx);
@@ -1122,8 +1122,8 @@ export default function (chart, courseId) {
       // Draw (backward scanning)
 
       for (let ridx = rows.length; ridx-- > 0; ) {
-        const row = rows[ridx],
-          measures = row.measures;
+        const row = rows[ridx];
+        const measures = row.measures;
 
         for (let midx = measures.length; midx-- > 0; ) {
           const measure = measures[midx];
@@ -1153,13 +1153,13 @@ export default function (chart, courseId) {
                   true,
                 ];
               } else {
-                const measureE = course.measures[rollEnd.midx],
-                  positionE = rollEnd.note.position;
+                const measureE = course.measures[rollEnd.midx];
+                const positionE = rollEnd.note.position;
                 const posRmidxE = midxToPosRmidx[rollEnd.midx];
                 const rmidxE =
                   posRmidxE.findLast((x) => x[0] <= positionE) || posRmidxE[0];
-                const ridxE = rmidxE[1],
-                  midxE = rmidxE[2];
+                const ridxE = rmidxE[1];
+                const midxE = rmidxE[2];
 
                 const omitE = rollEnd.note.type !== 'end'; // omit forced roll ends for clarity
                 const rowE = rows[ridxE];

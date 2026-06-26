@@ -430,9 +430,9 @@ function buildStatisticsPage(data) {
     `${scoreShinOrInit}${strPts} => ${statPotential2}${strPts}${strPlusRolls}`,
   );
 
-  let bpmMin = 0,
-    bpmMax = 0,
-    firstBpm = true;
+  let bpmMin = 0;
+  let bpmMax = 0;
+  let firstBpm = true;
   for (let i = 0; i < course.measures.length; i++) {
     for (let j = 0; j < course.measures[i].events.length; j++) {
       if (course.measures[i].events[j].name === 'bpm') {
@@ -523,8 +523,8 @@ function buildStatisticsPage(data) {
   );
 
   // Graph
-  const graphWidth = 600,
-    graphHeight = 200;
+  const graphWidth = 600;
+  const graphHeight = 200;
   const x = d3.scaleBand().rangeRound([
     0,
     graphWidth,
@@ -601,9 +601,9 @@ function buildStatisticsPage(data) {
 }
 
 function copyRendaText(rendas, rendaExtends, rendaLength) {
-  let result = '',
-    groupCount = 0,
-    groupFirst = true;
+  let result = '';
+  let groupCount = 0;
+  let groupFirst = true;
   const groupMax = rendaExtends.reduce((a, b) => Math.max(a, b.rendaGroup), -1);
 
   const markNegative = (x) => `(${x})`;
