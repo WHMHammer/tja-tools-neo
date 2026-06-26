@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 export default {
     "notes": {
         "adlib": require("./notes-adlib.png").default,

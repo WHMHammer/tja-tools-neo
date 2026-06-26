@@ -1,4 +1,6 @@
-// i18n.js - 国际化模块
+// @ts-nocheck
+
+// i18n.ts - 国际化模块
 // 支持英语、日语、简体中文
 
 const translations = {
@@ -277,7 +279,7 @@ export const t = (key) => i18n.t(key);
 export const setLanguage = (lang) => i18n.setLanguage(lang);
 export const getCurrentLanguage = () => i18n.getCurrentLanguage();
 
-// 难度类型转换函数（用于替换parseTJA.js中的函数）
+// 难度类型转换函数（用于替换parseTJA.ts中的函数）
 export function difficultyTypeToString(difficultyType) {
     switch (difficultyType) {
         case 0: return i18n.t('difficulty.easy');
