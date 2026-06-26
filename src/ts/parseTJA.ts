@@ -1,7 +1,6 @@
 // @ts-nocheck
 
 import { addZero, arrayLCM } from './common';
-import { difficultyTypeToString } from './i18n';
 
 function parseCourseValue(courseValue) {
   switch (courseValue.toLowerCase()) {

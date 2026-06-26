@@ -1,11 +1,8 @@
 // @ts-nocheck
 
 import {
-  drawCircle,
-  drawCircleRightHalf,
   drawImageText,
   drawLine,
-  drawPixelText,
   drawRect,
   drawSprite,
   drawText,
