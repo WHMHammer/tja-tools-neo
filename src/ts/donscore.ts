@@ -146,7 +146,7 @@ export function convertToDonscore(chart, courseId) {
 
     for (let j = 0; j < newEvent[i].length; j++) {
       const rate = fixedMax / measure.nDivisions;
-      newEvent[i][j].position = newEvent[i][j].position * rate;
+      newEvent[i][j].position *= rate;
     }
 
     for (const bt of branchTypes) {

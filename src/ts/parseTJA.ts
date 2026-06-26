@@ -598,7 +598,7 @@ function getCourse(tjaHeaders, lines) {
           if (nBranchMeasures > nBranchMeasuresMax) {
             nBranchMeasuresMax = nBranchMeasures;
           }
-          midxBranchPoint = midxBranchPoint + nBranchMeasuresMax;
+          midxBranchPoint += nBranchMeasuresMax;
           nBranchMeasuresMax = nBranchMeasures = 0;
 
           currentMeasure = getMeasure(midxBranchPoint);
@@ -611,7 +611,7 @@ function getCourse(tjaHeaders, lines) {
           if (nBranchMeasures > nBranchMeasuresMax) {
             nBranchMeasuresMax = nBranchMeasures;
           }
-          midxBranchPoint = midxBranchPoint + nBranchMeasuresMax;
+          midxBranchPoint += nBranchMeasuresMax;
           nBranchMeasuresMax = nBranchMeasures = 0;
 
           currentMeasure = getMeasure(midxBranchPoint);
@@ -868,7 +868,7 @@ function getCourse(tjaHeaders, lines) {
       if (measures[i].data[measures[i].events[j].branch] != null) {
         const rate =
           fixedMax / measures[i].data[measures[i].events[j].branch].nDivisions;
-        measures[i].events[j].position = measures[i].events[j].position * rate;
+        measures[i].events[j].position *= rate;
       }
     }
 
