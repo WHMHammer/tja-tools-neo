@@ -78,6 +78,7 @@ export enum NoteType {
   Unknown = 'unknown',
 }
 
+const NOTE_SYMBOL_REG_EXP = /[0-9A-Z]/;
 function noteSymbolToNoteType(noteSymbol) {
   switch (noteSymbol) {
     case '0':
@@ -124,7 +125,7 @@ function noteSymbolToNoteType(noteSymbol) {
     case 'G':
       return NoteType.Kadon;
   }
-  return noteSymbol.match(/[0-9A-Z]/) ? NoteType.Unknown : null;
+  return noteSymbol.match(NOTE_SYMBOL_REG_EXP) ? NoteType.Unknown : null;
 }
 
 export enum HandType {
@@ -256,6 +257,10 @@ enum HeaderScope {
   Course = 'course',
 }
 
+const LINE_COMMENT_REG_EXP = /\/\/.*/;
+const HEADER_REG_EXP = /^(\.?[A-Z0-9_]+):(.*)/i;
+const COMMAND_REG_EXP = /^#([A-Z]+)\s?(.*)/i;
+const DATA_REG_EXP = /^[0-9A-Z,]/;
 function parseLine(line) {
   // const HeaderGlobal = [
   //   'TITLE',
@@ -326,14 +331,14 @@ function parseLine(line) {
   // comment
   line = line.trimStart();
   function trimComment(str) {
-    return str.replace(/\/\/.*/, '').trim();
+    return str.replace(LINE_COMMENT_REG_EXP, '').trim();
   }
   if (trimComment(line) === '') {
     return null;
   }
 
   // header
-  match = line.match(/^(\.?[A-Z0-9_]+):(.*)/i);
+  match = line.match(HEADER_REG_EXP);
   if (match) {
     // . for simulator-exclusive headers, _ for i18n headers
     const nameUpper = match[1].toUpperCase();
@@ -350,7 +355,7 @@ function parseLine(line) {
     };
   }
   // command
-  match = line.match(/^#([A-Z]+)\s?(.*)/i);
+  match = line.match(COMMAND_REG_EXP);
   if (match) {
     // missing space is recognized in TaikoJiro
     const nameUpper = match[1].toUpperCase();
@@ -364,7 +369,7 @@ function parseLine(line) {
     };
   }
   // data
-  if (line.match(/^[0-9A-Z,]/)) {
+  if (line.match(DATA_REG_EXP)) {
     // loose pattern to prevent dropping note data with unknown note symbols
     return {
       type: LineType.Data,
@@ -403,6 +408,9 @@ export enum EventType {
   MoveLine = 'moveLine',
 }
 
+const BALLOON_SEPARATOR_REG_EXP = /[^0-9]/;
+const START_PLAYER_REG_EXP = /P(\d+)/;
+const TRAILING_COMMA_REG_EXP = /,$/;
 function getCourse(tjaHeaders, lines) {
   const defaultCourseHeaders = tjaHeaders.courseHeaders[undefined];
   const latestCourseHeaders = tjaHeaders.latestCourseHeaders;
@@ -573,7 +581,7 @@ function getCourse(tjaHeaders, lines) {
             break;
           }
           balloons = line.value
-            .split(/[^0-9]/)
+            .split(BALLOON_SEPARATOR_REG_EXP)
             .filter((b) => b !== '')
             .map((b) => Number.parseInt(b, 10));
           setHeaderBalloon('all', balloons);
@@ -585,7 +593,7 @@ function getCourse(tjaHeaders, lines) {
             break;
           }
           balloons = line.value
-            .split(/[^0-9]/)
+            .split(BALLOON_SEPARATOR_REG_EXP)
             .filter((b) => b !== '')
             .map((b) => Number.parseInt(b, 10));
           setHeaderBalloon(BranchType.N, balloons);
@@ -597,7 +605,7 @@ function getCourse(tjaHeaders, lines) {
             break;
           }
           balloons = line.value
-            .split(/[^0-9]/)
+            .split(BALLOON_SEPARATOR_REG_EXP)
             .filter((b) => b !== '')
             .map((b) => Number.parseInt(b, 10));
           setHeaderBalloon(BranchType.E, balloons);
@@ -609,7 +617,7 @@ function getCourse(tjaHeaders, lines) {
             break;
           }
           balloons = line.value
-            .split(/[^0-9]/)
+            .split(BALLOON_SEPARATOR_REG_EXP)
             .filter((b) => b !== '')
             .map((b) => Number.parseInt(b, 10));
           setHeaderBalloon(BranchType.M, balloons);
@@ -617,7 +625,7 @@ function getCourse(tjaHeaders, lines) {
 
         case 'SCOREINIT': {
           const inits = line.value
-            .split(/[^0-9]/)
+            .split(BALLOON_SEPARATOR_REG_EXP)
             .filter((b) => b !== '')
             .map((b) => Number.parseInt(b, 10));
 
@@ -716,7 +724,7 @@ function getCourse(tjaHeaders, lines) {
           break;
 
         case 'START': {
-          const matchStartPlayer = line.value.match(/P(\d+)/);
+          const matchStartPlayer = line.value.match(START_PLAYER_REG_EXP);
           if (matchStartPlayer) {
             const startPlayer = Number.parseInt(matchStartPlayer[1], 10);
             if (startPlayer > 0) {
@@ -733,7 +741,9 @@ function getCourse(tjaHeaders, lines) {
         default:
           switch (line.name) {
             case 'MEASURE': {
-              const divs = line.value.replace(/,$/, '').split(',');
+              const divs = line.value
+                .replace(TRAILING_COMMA_REG_EXP, '')
+                .split(',');
               if (divs.length === 0 || divs.length > 2) {
                 break;
               }
@@ -1068,9 +1078,11 @@ function getCourse(tjaHeaders, lines) {
   };
 }
 
+const NEW_LINE_REG_EXP = /(\r\n|\r|\n)/;
+const SUBTITLE_MODIFIER_PREFIX_REG_EXP = /^(\+\+|--)/;
 export function parseTja(tja) {
   // Split by lines
-  const lines = tja.split(/(\r\n|\r|\n)/).map((line) => line.trim());
+  const lines = tja.split(NEW_LINE_REG_EXP).map((line) => line.trim());
 
   const headers = {
     // global-fineness headers
@@ -1158,7 +1170,10 @@ export function parseTja(tja) {
           break;
 
         case 'SUBTITLE':
-          headers.subtitle = parsed.valueRaw.replace(/^(\+\+|--)/, ''); // TODO: emit warning when value !== valueRaw
+          headers.subtitle = parsed.valueRaw.replace(
+            SUBTITLE_MODIFIER_PREFIX_REG_EXP,
+            '',
+          ); // TODO: emit warning when value !== valueRaw
           break;
 
         case 'BPM':
@@ -1235,7 +1250,7 @@ export function parseTja(tja) {
       }
     } else if (parsed.type === LineType.Data) {
       if (!hasStarted) {
-        if (!parsed.data.match(/^[0-9]/)) {
+        if (!parsed.data.match(DATA_REG_EXP)) {
           // likely an incomplete header
           continue; // TODO: emit incomplete header warning
         }
@@ -1276,7 +1291,7 @@ export function getCourseLines(tja, chart, courseId) {
   let writeHeader = getWriteHeader();
   let writeData = getWriteHeader();
 
-  const lines = tja.split(/(\r\n|\r|\n)/);
+  const lines = tja.split(NEW_LINE_REG_EXP);
 
   for (const line of lines) {
     const parsed = parseLine(line);
