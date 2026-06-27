@@ -17,6 +17,11 @@ export async function loadAllFonts() {
   await Promise.all(fontPromises);
 }
 
+export enum FontType {
+  Donscore = 'donscore',
+  SansSerif = 'sans-serif',
+}
+
 export function getFontSetting(headerFont) {
   const result = {
     titleText: '',
@@ -31,7 +36,7 @@ export function getFontSetting(headerFont) {
     strokeDifficulty: false,
   };
 
-  if (headerFont === 'sans-serif') {
+  if (headerFont === FontType.SansSerif) {
     result.titleText = 'bold 20px sans-serif';
     result.subtitleText = 'bold 17px sans-serif';
   } else {

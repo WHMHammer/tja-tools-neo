@@ -1,6 +1,8 @@
 // @ts-nocheck
 
 import {
+  AlignX,
+  AlignY,
   drawImageText,
   drawLine,
   drawRect,
@@ -8,9 +10,16 @@ import {
   drawText,
   initSprites,
 } from './canvasHelper';
+import { SpRoll } from './donscore';
 import { getFontSetting, getTextPositionY, getUraSymbol } from './font/font';
 import { toFixedZero } from './main';
-import { isRollType } from './parseTJA';
+import {
+  BranchType,
+  EventType,
+  HandType,
+  isRollType,
+  NoteType,
+} from './parseTJA';
 
 //==============================================================================
 // Drawing config and helpers
@@ -30,14 +39,19 @@ const ROW_OFFSET_NOTE_CENTER = ROW_HEIGHT_INFO + ROW_HEIGHT_NOTE / 2;
 const ROW_LEADING = 24;
 const ROW_TRAILING = 24;
 const ROW_COLOR = {
-  'N': '#808080',
-  'E': '#609f9f',
-  'M': '#9f6060',
+  [BranchType.N]: '#808080',
+  [BranchType.E]: '#609f9f',
+  [BranchType.M]: '#9f6060',
 };
+enum LineColorType {
+  Normal = 'normal',
+  Branch = 'branch',
+  Event = 'event',
+}
 const LINE_COLOR = {
-  normal: '#fff',
-  branch: '#ffe400',
-  event: '#444',
+  [LineColorType.Normal]: '#fff',
+  [LineColorType.Branch]: '#ffe400',
+  [LineColorType.Event]: '#444',
 };
 
 const BEAT_WIDTH = 48;
@@ -70,9 +84,9 @@ const IS_POSITION_IN_ROW = (row, midx, position) =>
   && (midx !== row.measures.length - 1 || position < row.positionEnd);
 
 const branchTypes = [
-  'N',
-  'E',
-  'M',
+  BranchType.N,
+  BranchType.E,
+  BranchType.M,
 ];
 
 export function compareArray(array1, array2) {
@@ -105,8 +119,8 @@ function drawNoteSprite(
   yDelta,
   beat,
   type,
-  alignY = 'center',
-  alignX = 'center',
+  alignY = AlignY.Center,
+  alignX = AlignX.Center,
 ) {
   const { x, y } = getNoteCenter(row, beat);
   drawSprite(ctx, x, y + yDelta, type, 'notes', alignY, alignX);
@@ -246,8 +260,8 @@ function drawRendaSprite(
     bidx * 24,
     sBeat,
     type + 'Start',
-    'center',
-    'right',
+    AlignY.Center,
+    AlignX.Right,
   );
 }
 
@@ -262,15 +276,15 @@ function drawBalloonSprite(
   omitEnd,
   count,
   imo = false,
-  spSymbol = 'kusudama',
+  spSymbol = SpRoll.Kusudama,
 ) {
   let symbol = 'balloon';
   if (imo) {
-    if (spSymbol === 'denden') {
+    if (spSymbol === SpRoll.Denden) {
       symbol = 'denden';
-    } else if (spSymbol === 'potato') {
+    } else if (spSymbol === SpRoll.Potato) {
       symbol = 'potato';
-    } else if (spSymbol === 'suzudon') {
+    } else if (spSymbol === SpRoll.Suzudon) {
       symbol = 'suzudon';
     } else {
       symbol = 'kusudama';
@@ -289,7 +303,15 @@ function drawBalloonSprite(
     }
   }
   drawLongSprite(ctx, rows, bt, sRow, sBeat, eRow, eBeat, 'spRollMiddle');
-  drawNoteSprite(ctx, sRow, bidx * 24, sBeat, 'spRollStart', 'center', 'right');
+  drawNoteSprite(
+    ctx,
+    sRow,
+    bidx * 24,
+    sBeat,
+    'spRollStart',
+    AlignY.Center,
+    AlignX.Right,
+  );
   drawNoteSprite(ctx, sRow, bidx * 24, sBeat, symbol);
 
   const { x, y } = getNoteCenter(sRow, sBeat);
@@ -788,16 +810,16 @@ export function drawChart(chart, courseId) {
           event.position,
         );
 
-        if (event.name === 'gogoStart' && !gogoStart) {
+        if (event.name === EventType.GogoStart && !gogoStart) {
           gogoStart = [
             ridx,
             eBeat,
           ];
-        } else if (event.name === 'gogoEnd' && gogoStart) {
+        } else if (event.name === EventType.GogoEnd && gogoStart) {
           drawLongSprite(
             ctx,
             rows,
-            'N',
+            BranchType.N,
             gogoStart[0],
             gogoStart[1],
             ridx,
@@ -813,7 +835,7 @@ export function drawChart(chart, courseId) {
       drawLongSprite(
         ctx,
         rows,
-        'N',
+        BranchType.N,
         gogoStart[0],
         gogoStart[1],
         ridx,
@@ -983,9 +1005,9 @@ export function drawChart(chart, courseId) {
       // Events
       function eventProcessOrder(event) {
         switch (event.name) {
-          case 'scroll': // has line, highest
+          case EventType.Scroll: // has line, highest
             return 1;
-          case 'bpm':
+          case EventType.Bpm:
             return 2;
           default: // no lines
             return 0;
@@ -1021,7 +1043,7 @@ export function drawChart(chart, courseId) {
           drawBarline(branchStart.ex, branchStart.position, false);
         }
 
-        if (event.name === 'scroll') {
+        if (event.name === EventType.Scroll) {
           const scrollsTemp = [];
           const valueLookup = {};
           for (const bt in event.value) {
@@ -1048,11 +1070,11 @@ export function drawChart(chart, courseId) {
 
             if (event.branching) {
               for (const stb of sTemp.branch) {
-                if (stb === 'N') {
+                if (stb === BranchType.N) {
                   scrollText += '普';
-                } else if (stb === 'E') {
+                } else if (stb === BranchType.E) {
                   scrollText += '玄';
-                } else if (stb === 'M') {
+                } else if (stb === BranchType.M) {
                   scrollText += '達';
                 }
               }
@@ -1075,7 +1097,7 @@ export function drawChart(chart, courseId) {
             });
             scrollCount++;
           }
-        } else if (event.name === 'bpm') {
+        } else if (event.name === EventType.Bpm) {
           drawBarline(ex, event.position, true);
           //drawPixelText(ctx, ex + 2, y + ROW_HEIGHT_INFO - 7, 'BPM ' + toFixedZero(event.value.toFixed(2)), '#00f', 'bottom', 'left');
 
@@ -1094,20 +1116,20 @@ export function drawChart(chart, courseId) {
             enx: ex + 6 * bpmText.length - 1,
             eny: y + ROW_HEIGHT_INFO - 12 + moveEvent + 5,
           });
-        } else if (event.name === 'barlineon') {
+        } else if (event.name === EventType.Barlineon) {
           barline = true;
-        } else if (event.name === 'barlineoff') {
+        } else if (event.name === EventType.Barlineoff) {
           barline = false;
-        } else if (event.name === 'branchStart') {
+        } else if (event.name === EventType.BranchStart) {
           branchStart.position = event.position;
           branchStart.ex = ex;
-        } else if (event.name === 'moveEvent') {
+        } else if (event.name === EventType.MoveEvent) {
           moveEvent = isNaN(event.value) ? moveEvent : event.value;
-        } else if (event.name === 'countChange') {
+        } else if (event.name === EventType.CountChange) {
           measureNumber = isNaN(event.value) ? measureNumber : event.value;
-        } else if (event.name === 'avoidtexton') {
+        } else if (event.name === EventType.Avoidtexton) {
           avoidText = true;
-        } else if (event.name === 'avoidtextoff') {
+        } else if (event.name === EventType.Avoidtextoff) {
           avoidText = false;
         }
       }
@@ -1168,7 +1190,7 @@ export function drawChart(chart, courseId) {
               const ridxE = rmidxE[1];
               const midxE = rmidxE[2];
 
-              const omitE = rollEnd.note.type !== 'end'; // omit forced roll ends for clarity
+              const omitE = rollEnd.note.type !== NoteType.End; // omit forced roll ends for clarity
               const rowE = rows[ridxE];
               const nBeatE = GET_MEASURE_POS_BEAT_NOTE(
                 rowE.rowBeats[midxE],
@@ -1193,34 +1215,34 @@ export function drawChart(chart, courseId) {
 
           // Hand
           switch (note.handType) {
-            case 'hand':
+            case HandType.Hand:
               drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'hand');
               break;
 
-            case 'handBig':
+            case HandType.HandBig:
               drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'bigHand');
               break;
           }
 
           // Note
           switch (note.type) {
-            case 'don':
+            case NoteType.Don:
               drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'don');
               break;
 
-            case 'kat':
+            case NoteType.Kat:
               drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'kat');
               break;
 
-            case 'donBig':
+            case NoteType.DonBig:
               drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'bigDon');
               break;
 
-            case 'katBig':
+            case NoteType.KatBig:
               drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'bigKat');
               break;
 
-            case 'renda':
+            case NoteType.Renda:
               drawRendaSprite(
                 ctx,
                 rows,
@@ -1234,7 +1256,7 @@ export function drawChart(chart, courseId) {
               );
               break;
 
-            case 'rendaBig':
+            case NoteType.RendaBig:
               drawRendaSprite(
                 ctx,
                 rows,
@@ -1248,7 +1270,7 @@ export function drawChart(chart, courseId) {
               );
               break;
 
-            case 'balloon':
+            case NoteType.Balloon:
               drawBalloonSprite(
                 ctx,
                 rows,
@@ -1262,7 +1284,7 @@ export function drawChart(chart, courseId) {
               );
               break;
 
-            case 'balloonEx':
+            case NoteType.BalloonEx:
               drawBalloonSprite(
                 ctx,
                 rows,
@@ -1278,11 +1300,11 @@ export function drawChart(chart, courseId) {
               );
               break;
 
-            case 'mine':
+            case NoteType.Mine:
               drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'bomb');
               break;
 
-            case 'fuse':
+            case NoteType.Fuse:
               drawFuseSprite(
                 ctx,
                 rows,
@@ -1296,18 +1318,18 @@ export function drawChart(chart, courseId) {
               );
               break;
 
-            case 'adlib':
+            case NoteType.Adlib:
               drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'adlib');
               break;
 
-            case 'kadon':
+            case NoteType.Kadon:
               drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'purple');
               break;
           }
 
           // Overlay text
           switch (note.handType) {
-            case 'handBig':
+            case HandType.HandBig:
               drawNoteSprite(ctx, ridx, rowYDelta, nBeat, 'bigHandText');
               break;
           }

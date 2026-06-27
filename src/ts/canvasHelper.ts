@@ -230,37 +230,49 @@ export function drawPixelText(
   drawText(ctx, x, y, text, '5px "Pixel 3x5"', color, baseline, textAlign);
 }
 
+export enum AlignY {
+  Top = 'top',
+  Center = 'center',
+  Bottom = 'bottom',
+}
+
+export enum AlignX {
+  Left = 'left',
+  Center = 'center',
+  Right = 'right',
+}
+
 export function drawSprite(
   ctx,
   x,
   y,
   key,
   type,
-  alignY = 'top',
-  alignX = 'left',
+  alignY = AlignY.Top,
+  alignX = AlignX.Left,
 ) {
   const sprite = sprites[type][key];
   switch (alignY) {
-    case 'center':
+    case AlignY.Center:
       y -= sprite.naturalHeight / 2;
       break;
-    case 'bottom':
+    case AlignY.Bottom:
       y -= sprite.naturalHeight;
       break;
     // biome-ignore lint/complexity/noUselessSwitchCase: to make the logic clear
-    case 'top':
+    case AlignY.Top:
     default:
       break;
   }
   switch (alignX) {
-    case 'center':
+    case AlignX.Center:
       x -= sprite.naturalWidth / 2;
       break;
-    case 'right':
+    case AlignX.Right:
       x -= sprite.naturalWidth;
       break;
     // biome-ignore lint/complexity/noUselessSwitchCase: to make the logic clear
-    case 'left':
+    case AlignX.Left:
     default:
       break;
   }

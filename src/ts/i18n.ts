@@ -1,10 +1,18 @@
 // @ts-nocheck
 
+import { CourseDifficulty } from './parseTJA';
+
 // i18n.ts - 国际化模块
 // 支持英语、日语、简体中文
 
+export enum Locale {
+  En = 'en',
+  Ja = 'ja',
+  ZhCn = 'zh-cn',
+}
+
 const translations = {
-  en: {
+  [Locale.En]: {
     // 编辑器区域
     'editor.title':
       'Editor (Drag and drop or <label for="tja-file">choose</label> a .TJA file)',
@@ -80,7 +88,7 @@ const translations = {
     'unit.sec': 's',
   },
 
-  ja: {
+  [Locale.Ja]: {
     // 编辑器区域
     'editor.title':
       'エディタ (tjaファイルをドラッグ＆ドロップするか<label for="tja-file">選択</label>してください)',
@@ -156,7 +164,7 @@ const translations = {
     'unit.sec': '秒',
   },
 
-  'zh-cn': {
+  [Locale.ZhCn]: {
     // 编辑器区域
     'editor.title':
       '编辑器（拖拽或<label for="tja-file">选择</label>一个 .TJA 文件）',
@@ -234,7 +242,7 @@ const translations = {
 
 class I18n {
   constructor() {
-    this.currentLanguage = 'en';
+    this.currentLanguage = Locale.En;
     this.translations = translations;
   }
 
@@ -291,15 +299,15 @@ export const getCurrentLanguage = () => i18n.getCurrentLanguage();
 // 难度类型转换函数（用于替换parseTJA.ts中的函数）
 export function difficultyTypeToString(difficultyType) {
   switch (difficultyType) {
-    case 0:
+    case CourseDifficulty.Easy:
       return i18n.t('difficulty.easy');
-    case 1:
+    case CourseDifficulty.Normal:
       return i18n.t('difficulty.normal');
-    case 2:
+    case CourseDifficulty.Hard:
       return i18n.t('difficulty.hard');
-    case 3:
+    case CourseDifficulty.Oni:
       return i18n.t('difficulty.oni');
-    case 4:
+    case CourseDifficulty.Edit:
       return i18n.t('difficulty.edit');
   }
   return 'Unknown';

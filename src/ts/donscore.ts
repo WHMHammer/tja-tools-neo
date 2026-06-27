@@ -2,30 +2,50 @@
 
 import { addZero, arrayLCM, lcm } from './common';
 import { compareArray } from './drawChart';
-import { isBalloonType, isRollType } from './parseTJA';
+import {
+  BranchType,
+  EventType,
+  isBalloonType,
+  isRollType,
+  NoteType,
+} from './parseTJA';
 
 const aryMax = (a, b) => Math.max(a, b);
+
+export enum SpRoll {
+  Kusudama = 'kusudama',
+  Denden = 'denden',
+  Suzudon = 'suzudon',
+  Potato = 'potato',
+}
+
+enum SpChar {
+  Kusudama = 'k',
+  Denden = 'd',
+  Suzudon = 'b',
+  Potato = 'p',
+}
 
 export function convertToDonscore(chart, courseId) {
   const result = [];
   const course = chart.courses[courseId];
   const branchTypes = [
-    'N',
-    'E',
-    'M',
+    BranchType.N,
+    BranchType.E,
+    BranchType.M,
   ];
-  let spSymbol = 'k';
+  let spSymbol = SpChar.Kusudama;
 
   // Set SpRoll Symbol
   switch (chart.headers.spRoll) {
-    case 'denden':
-      spSymbol = 'd';
+    case SpRoll.Denden:
+      spSymbol = SpChar.Denden;
       break;
-    case 'suzudon':
-      spSymbol = 'b';
+    case SpRoll.Suzudon:
+      spSymbol = SpChar.Suzudon;
       break;
-    case 'potato':
-      spSymbol = 'p';
+    case SpRoll.Potato:
+      spSymbol = SpChar.Potato;
       break;
   }
 
@@ -47,9 +67,9 @@ export function convertToDonscore(chart, courseId) {
   const newData = [];
   for (const measure of course.measures) {
     const tempData = {
-      'N': null,
-      'E': null,
-      'M': null,
+      [BranchType.N]: null,
+      [BranchType.E]: null,
+      [BranchType.M]: null,
     };
 
     for (const bt of branchTypes) {
@@ -95,7 +115,10 @@ export function convertToDonscore(chart, courseId) {
           } else {
             margin = 1; // `<`
           }
-        } else if (note.type === 'end' || note.type === 'endForced') {
+        } else if (
+          note.type === NoteType.End
+          || note.type === NoteType.EndForced
+        ) {
           marginDiff.push(margin - (note.position - index - 1)); // `[@5` - (between `[` & `]`), or (between line start & `]`)
           rolling = false;
         }
@@ -156,9 +179,9 @@ export function convertToDonscore(chart, courseId) {
   const converted = [];
   for (const _ of newData) {
     converted.push({
-      'N': null,
-      'E': null,
-      'M': null,
+      [BranchType.N]: null,
+      [BranchType.E]: null,
+      [BranchType.M]: null,
     });
   }
   for (const bt of branchTypes) {
@@ -183,7 +206,7 @@ export function convertToDonscore(chart, courseId) {
         }
         if (notes.length === 0) {
           notes.push({
-            type: 'blank',
+            type: NoteType.Blank,
           });
         }
 
@@ -196,8 +219,13 @@ export function convertToDonscore(chart, courseId) {
             } else {
               balloonTextCount = 0;
             }
-          } else if (note.type === 'end' || note.type === 'endForced') {
-            tempData.push(note.type === 'end' ? endChar : '\\' + endChar);
+          } else if (
+            note.type === NoteType.End
+            || note.type === NoteType.EndForced
+          ) {
+            tempData.push(
+              note.type === NoteType.End ? endChar : '\\' + endChar,
+            );
             rolling = false;
             continue;
           } else if (rolling) {
@@ -212,40 +240,40 @@ export function convertToDonscore(chart, courseId) {
           }
 
           switch (note.type) {
-            case 'don':
+            case NoteType.Don:
               tempData.push('o');
               break;
-            case 'kat':
+            case NoteType.Kat:
               tempData.push('x');
               break;
-            case 'donBig':
+            case NoteType.DonBig:
               tempData.push('O');
               break;
-            case 'katBig':
+            case NoteType.KatBig:
               tempData.push('X');
               break;
-            case 'renda':
+            case NoteType.Renda:
               tempData.push('<');
               endChar = '>';
               break;
-            case 'rendaBig':
+            case NoteType.RendaBig:
               tempData.push('(');
               endChar = ')';
               break;
-            case 'balloon':
-            case 'fuse':
+            case NoteType.Balloon:
+            case NoteType.Fuse:
               tempData.push('[');
               endChar = ']';
               balloonText = '@' + balloonCount.toString();
               balloonTextCount = balloonText.length;
               break;
-            case 'balloonEx':
+            case NoteType.BalloonEx:
               tempData.push('[');
               endChar = ']';
               balloonText = spSymbol + balloonCount.toString();
               balloonTextCount = balloonText.length;
               break;
-            case 'mine':
+            case NoteType.Mine:
               tempData.push('B');
               break;
             default:
@@ -329,7 +357,7 @@ export function convertToDonscore(chart, courseId) {
 
   // Chart
   let preBranch = [
-    'N',
+    BranchType.N,
   ];
   let preBeatChar = 4;
   let preMeter = [
@@ -351,7 +379,7 @@ export function convertToDonscore(chart, courseId) {
     // Branch Start
     let hasBranchStart = false;
     for (const event of measure.events) {
-      if (event.name === 'branchStart') {
+      if (event.name === EventType.BranchStart) {
         hasBranchStart = true;
         break;
       }
@@ -407,42 +435,42 @@ export function convertToDonscore(chart, courseId) {
       let eventText = '';
 
       switch (event.name) {
-        case 'gogoStart':
+        case EventType.GogoStart:
           eventText = '#begingogo';
           if (event.position > 0) {
             eventText += ` ${splitNum} ${fixedPosition}`;
           }
           result.push(eventText);
           break;
-        case 'gogoEnd':
+        case EventType.GogoEnd:
           eventText = '#endgogo';
           if (event.position > 0) {
             eventText += ` ${splitNum} ${fixedPosition}`;
           }
           result.push(eventText);
           break;
-        case 'barlineon':
+        case EventType.Barlineon:
           eventText = '#barlineon';
           if (event.position > 0) {
             eventText += ` ${splitNum} ${fixedPosition}`;
           }
           result.push(eventText);
           break;
-        case 'barlineoff':
+        case EventType.Barlineoff:
           eventText = '#barlineoff';
           if (event.position > 0) {
             eventText += ` ${splitNum} ${fixedPosition}`;
           }
           result.push(eventText);
           break;
-        case 'bpm':
+        case EventType.Bpm:
           eventText = `#bpm ${event.value}`;
           if (event.position > 0) {
             eventText += ` ${splitNum} ${fixedPosition}`;
           }
           result.push(eventText);
           break;
-        case 'scroll': {
+        case EventType.Scroll: {
           const scrollsTemp = [];
           const valueLookup = {};
           for (const bt in event.value) {

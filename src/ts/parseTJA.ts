@@ -2,30 +2,43 @@
 
 import { addZero, arrayLCM } from './common';
 
+export enum CourseDifficulty {
+  Easy = 0,
+  Normal = 1,
+  Hard = 2,
+  Oni = 3,
+  Edit = 4,
+}
+
 function parseCourseValue(courseValue) {
   switch (courseValue.toLowerCase()) {
     case 'easy':
     case '0':
-      return 0;
+      return CourseDifficulty.Easy;
 
     case 'normal':
     case '1':
-      return 1;
+      return CourseDifficulty.Normal;
 
     case 'hard':
     case '2':
-      return 2;
+      return CourseDifficulty.Hard;
 
     case 'oni':
     case '3':
-      return 3;
+      return CourseDifficulty.Oni;
 
     case 'edit':
     case 'ura':
     case '4':
-      return 4;
+      return CourseDifficulty.Edit;
   }
   return null;
+}
+
+enum StyleType {
+  Single = 1,
+  Double = 2,
 }
 
 function parseStyleValue(styleValue) {
@@ -35,82 +48,108 @@ function parseStyleValue(styleValue) {
   }
   switch (styleValue.toLowerCase()) {
     case 'single':
-      return 1;
+      return StyleType.Single;
 
     case 'couple':
     case 'double':
-      return 2;
+      return StyleType.Double;
   }
   return null;
+}
+
+export enum NoteType {
+  Blank = 'blank',
+  Don = 'don',
+  Kat = 'kat',
+  DonBig = 'donBig',
+  KatBig = 'katBig',
+  Kadon = 'kadon',
+  Renda = 'renda',
+  RendaBig = 'rendaBig',
+  Balloon = 'balloon',
+  BalloonEx = 'balloonEx',
+  Fuse = 'fuse',
+  End = 'end',
+  EndForced = 'endForced',
+  Adlib = 'adlib',
+  Mine = 'mine',
+  Hakushu = 'hakushu', // H: bongo clap applause
+  RendaLeft = 'rendaLeft', // I: bongo yellow/left roll
+  Unknown = 'unknown',
 }
 
 function noteSymbolToNoteType(noteSymbol) {
   switch (noteSymbol) {
     case '0':
-      return 'blank';
+      return NoteType.Blank;
 
     case '1':
-      return 'don';
+      return NoteType.Don;
 
     case '2':
-      return 'kat';
+      return NoteType.Kat;
 
     case '3':
     case 'A':
-      return 'donBig';
+      return NoteType.DonBig;
 
     case '4':
     case 'B':
-      return 'katBig';
+      return NoteType.KatBig;
 
     case '5':
-      return 'renda';
+      return NoteType.Renda;
 
     case '6':
-      return 'rendaBig';
+      return NoteType.RendaBig;
 
     case '7':
-      return 'balloon';
+      return NoteType.Balloon;
 
     case '8':
-      return 'end';
+      return NoteType.End;
 
     case '9':
-      return 'balloonEx';
+      return NoteType.BalloonEx;
 
     case 'C':
-      return 'mine';
+      return NoteType.Mine;
 
     case 'D':
-      return 'fuse';
+      return NoteType.Fuse;
 
     case 'F':
-      return 'adlib';
+      return NoteType.Adlib;
 
     case 'G':
-      return 'kadon';
+      return NoteType.Kadon;
   }
-  return noteSymbol.match(/[0-9A-Z]/) ? 'unknown' : null;
+  return noteSymbol.match(/[0-9A-Z]/) ? NoteType.Unknown : null;
+}
+
+export enum HandType {
+  Hand = 'hand',
+  HandBig = 'handBig',
 }
 
 function noteSymbolToHandType(noteSymbol) {
   switch (noteSymbol) {
     case 'A':
     case 'B':
-      return 'handBig';
+      return HandType.HandBig;
   }
   return null;
 }
 
 export function isRollType(noteType) {
   switch (noteType) {
-    case 'renda':
-    case 'rendaBig':
-    case 'balloon':
-    case 'balloonEx':
-    case 'fuse':
-    case 'hakushu': // H: bongo clap applause
-    case 'rendaLeft': // I: bongo yellow/left roll
+    case NoteType.Renda:
+    case NoteType.RendaBig:
+    case NoteType.Balloon:
+    case NoteType.BalloonEx:
+    case NoteType.Fuse:
+    case NoteType.Hakushu:
+    case NoteType.RendaLeft:
       return true;
 
     default:
@@ -120,15 +159,22 @@ export function isRollType(noteType) {
 
 export function isBalloonType(noteType) {
   switch (noteType) {
-    case 'balloon':
-    case 'balloonEx':
-    case 'fuse':
+    case NoteType.Balloon:
+    case NoteType.BalloonEx:
+    case NoteType.Fuse:
       return true;
 
     default:
       return false;
   }
 }
+
+enum BalloonType {
+  All = 0,
+  PerBranch = 1,
+}
+
+type BalloonBranch = BranchType | 'all';
 
 function getNotes(data, rollStates, balloon, midx, currentBranch) {
   const notes = [];
@@ -149,7 +195,7 @@ function getNotes(data, rollStates, balloon, midx, currentBranch) {
       ++dSkip;
       continue;
     }
-    if (note.type === 'unknown') {
+    if (note.type === NoteType.Unknown) {
       // TODO: emit unknown note type warning
     }
 
@@ -164,7 +210,8 @@ function getNotes(data, rollStates, balloon, midx, currentBranch) {
       };
 
       if (isBalloonType(note.type)) {
-        const balloonBranch = balloon.type === 0 ? 'all' : currentBranch;
+        const balloonBranch: BalloonBranch =
+          balloon.type === BalloonType.All ? 'all' : currentBranch;
         note.count =
           balloon[balloonBranch][rollStates.balloonOffset[balloonBranch]++];
         if (note.count === undefined) {
@@ -172,12 +219,12 @@ function getNotes(data, rollStates, balloon, midx, currentBranch) {
         }
       }
     } else if (
-      note.type !== 'blank'
+      note.type !== NoteType.Blank
       && rollStates.roll[currentBranch] !== null
     ) {
       const noteEnd = {
-        symbol: note.type === 'end' ? ch : null,
-        type: note.type === 'end' ? 'end' : 'endForced',
+        symbol: note.type === NoteType.End ? ch : null,
+        type: note.type === NoteType.End ? NoteType.End : NoteType.EndForced,
         position: d - dSkip,
         start: rollStates.roll[currentBranch],
       };
@@ -190,11 +237,23 @@ function getNotes(data, rollStates, balloon, midx, currentBranch) {
       rollStates.roll[currentBranch] = null;
     }
 
-    if (note.type !== 'blank' && note.type !== 'end') {
+    if (note.type !== NoteType.Blank && note.type !== NoteType.End) {
       notes.push(note);
     }
   }
   return notes;
+}
+
+enum LineType {
+  Header = 'header',
+  Command = 'command',
+  Data = 'data',
+  Unknown = 'unknown',
+}
+
+enum HeaderScope {
+  Global = 'global',
+  Course = 'course',
 }
 
 function parseLine(line) {
@@ -281,8 +340,10 @@ function parseLine(line) {
     const value = match[2];
 
     return {
-      type: 'header',
-      scope: HeaderCourse.includes(nameUpper) ? 'course' : 'global',
+      type: LineType.Header,
+      scope: HeaderCourse.includes(nameUpper)
+        ? HeaderScope.Course
+        : HeaderScope.Global,
       name: nameUpper,
       value: trimComment(value),
       valueRaw: value, // for TITLE:, SUBTITLE:, etc., in TaikoJiro
@@ -296,7 +357,7 @@ function parseLine(line) {
     const value = match[2];
 
     return {
-      type: 'command',
+      type: LineType.Command,
       name: nameUpper,
       value: trimComment(value),
       valueRaw: value, // for #LYRIC, etc.
@@ -306,15 +367,40 @@ function parseLine(line) {
   if (line.match(/^[0-9A-Z,]/)) {
     // loose pattern to prevent dropping note data with unknown note symbols
     return {
-      type: 'data',
+      type: LineType.Data,
       data: trimComment(line),
     };
   }
 
   return {
-    type: 'unknown',
+    type: LineType.Unknown,
     value: line,
   };
+}
+
+export enum BranchType {
+  N = 'N',
+  E = 'E',
+  M = 'M',
+}
+
+export enum EventType {
+  Bpm = 'bpm',
+  Delay = 'delay',
+  GogoStart = 'gogoStart',
+  GogoEnd = 'gogoEnd',
+  Scroll = 'scroll',
+  BranchStart = 'branchStart',
+  BranchEnd = 'branchEnd',
+  Barlineon = 'barlineon',
+  Barlineoff = 'barlineoff',
+  MoveEvent = 'moveEvent',
+  CountChange = 'countChange',
+  Avoidtexton = 'avoidtexton',
+  Avoidtextoff = 'avoidtextoff',
+  Section = 'section',
+  TtBreak = 'ttBreak',
+  MoveLine = 'moveLine',
 }
 
 function getCourse(tjaHeaders, lines) {
@@ -333,19 +419,19 @@ function getCourse(tjaHeaders, lines) {
   function setHeaderBalloon(branch, value) {
     if (headers.balloon === undefined) {
       headers.balloon = {
-        'N': [],
-        'E': [],
-        'M': [],
-        all: [],
-        type: 0,
+        [BranchType.N]: [],
+        [BranchType.E]: [],
+        [BranchType.M]: [],
+        'all': [],
+        type: BalloonType.All,
       };
     }
     headers.balloon[branch] = value;
     switch (branch) {
-      case 'N':
-      case 'E':
-      case 'M':
-        headers.balloon.type = 1;
+      case BranchType.N:
+      case BranchType.E:
+      case BranchType.M:
+        headers.balloon.type = BalloonType.PerBranch;
     }
   }
 
@@ -354,9 +440,9 @@ function getCourse(tjaHeaders, lines) {
       ...data,
     };
     for (const branch of [
-      'N',
-      'E',
-      'M',
+      BranchType.N,
+      BranchType.E,
+      BranchType.M,
       'all',
     ]) {
       res[branch] = [
@@ -389,17 +475,17 @@ function getCourse(tjaHeaders, lines) {
   // Process lines
   let hasStarted = false;
   let measureData = '';
-  let currentBranch = 'N';
+  let currentBranch = BranchType.N;
   let branching = false;
   let midxBranchPoint = 0;
   let nBranchMeasures = 0;
   let nBranchMeasuresMax = 0;
   const rollStates = {
     balloonOffset: {
-      N: 0,
-      E: 0,
-      M: 0,
-      all: 0,
+      [BranchType.N]: 0,
+      [BranchType.E]: 0,
+      [BranchType.M]: 0,
+      'all': 0,
     },
     roll: {
       N: null,
@@ -453,7 +539,7 @@ function getCourse(tjaHeaders, lines) {
 
   for (const line of lines) {
     let balloons;
-    if (line.type === 'header') {
+    if (line.type === LineType.Header) {
       switch (line.name) {
         case 'COURSE': {
           const course = parseCourseValue(line.value);
@@ -502,7 +588,7 @@ function getCourse(tjaHeaders, lines) {
             .split(/[^0-9]/)
             .filter((b) => b !== '')
             .map((b) => Number.parseInt(b, 10));
-          setHeaderBalloon('N', balloons);
+          setHeaderBalloon(BranchType.N, balloons);
           break;
 
         case 'BALLOONEXP':
@@ -514,7 +600,7 @@ function getCourse(tjaHeaders, lines) {
             .split(/[^0-9]/)
             .filter((b) => b !== '')
             .map((b) => Number.parseInt(b, 10));
-          setHeaderBalloon('E', balloons);
+          setHeaderBalloon(BranchType.E, balloons);
           break;
 
         case 'BALLOONMAS':
@@ -526,7 +612,7 @@ function getCourse(tjaHeaders, lines) {
             .split(/[^0-9]/)
             .filter((b) => b !== '')
             .map((b) => Number.parseInt(b, 10));
-          setHeaderBalloon('M', balloons);
+          setHeaderBalloon(BranchType.M, balloons);
           break;
 
         case 'SCOREINIT': {
@@ -564,7 +650,7 @@ function getCourse(tjaHeaders, lines) {
           break;
         }
       }
-    } else if (line.type === 'command') {
+    } else if (line.type === LineType.Command) {
       if (!hasStarted && line.name !== 'END') {
         hasStarted = true;
         initBalloonHeader();
@@ -592,7 +678,7 @@ function getCourse(tjaHeaders, lines) {
                     }
 					*/
           branching = true;
-          currentBranch = 'N';
+          currentBranch = BranchType.N;
           if (nBranchMeasures > nBranchMeasuresMax) {
             nBranchMeasuresMax = nBranchMeasures;
           }
@@ -600,12 +686,12 @@ function getCourse(tjaHeaders, lines) {
           nBranchMeasuresMax = nBranchMeasures = 0;
 
           currentMeasure = getMeasure(midxBranchPoint);
-          addEvent('branchStart');
+          addEvent(EventType.BranchStart);
           break;
 
         case 'BRANCHEND':
           branching = false;
-          currentBranch = 'N';
+          currentBranch = BranchType.N;
           if (nBranchMeasures > nBranchMeasuresMax) {
             nBranchMeasuresMax = nBranchMeasures;
           }
@@ -613,7 +699,7 @@ function getCourse(tjaHeaders, lines) {
           nBranchMeasuresMax = nBranchMeasures = 0;
 
           currentMeasure = getMeasure(midxBranchPoint);
-          addEvent('branchEnd');
+          addEvent(EventType.BranchEnd);
           break;
 
         case 'N':
@@ -707,71 +793,71 @@ function getCourse(tjaHeaders, lines) {
             }
 
             case 'GOGOSTART':
-              addEvent('gogoStart');
+              addEvent(EventType.GogoStart);
               break;
 
             case 'GOGOEND':
-              addEvent('gogoEnd');
+              addEvent(EventType.GogoEnd);
               break;
 
             case 'BARLINEON':
-              addEvent('barlineon');
+              addEvent(EventType.Barlineon);
               break;
 
             case 'BARLINEOFF':
-              addEvent('barlineoff');
+              addEvent(EventType.Barlineoff);
               break;
 
             case 'SCROLL':
-              addEvent('scroll', line.value);
+              addEvent(EventType.Scroll, line.value);
               break;
 
             case 'BPMCHANGE':
-              addEvent('bpm', line.value);
+              addEvent(EventType.Bpm, line.value);
               break;
 
             case 'MOVEEVENT':
-              addEvent('moveEvent', Number.parseInt(line.value, 10));
+              addEvent(EventType.MoveEvent, Number.parseInt(line.value, 10));
               break;
 
             case 'COUNTCHANGE':
-              addEvent('countChange', Number.parseInt(line.value, 10));
+              addEvent(EventType.CountChange, Number.parseInt(line.value, 10));
               break;
 
             case 'AVOIDTEXTON':
-              addEvent('avoidtexton');
+              addEvent(EventType.Avoidtexton);
               break;
 
             case 'AVOIDTEXTOFF':
-              addEvent('avoidtextoff');
+              addEvent(EventType.Avoidtextoff);
               break;
 
             case 'DELAY':
-              addEvent('delay', Number.parseFloat(line.value));
+              addEvent(EventType.Delay, Number.parseFloat(line.value));
               break;
 
             case 'SECTION':
-              addEvent('section');
+              addEvent(EventType.Section);
               break;
 
             case 'MOVELINE':
-              addEvent('moveLine', Number.parseInt(line.value, 10));
+              addEvent(EventType.MoveLine, Number.parseInt(line.value, 10));
               break;
 
             case 'TTBREAK':
             case 'NEWLINE':
-              addEvent('ttBreak');
+              addEvent(EventType.TtBreak);
               break;
 
             /*
-                        case 'LEVELHOLD':
-                            flagLevelhold = true;
+            case 'LEVELHOLD':
+                flagLevelhold = true;
 						*/
           }
       }
     }
     //else if (line.type === 'data' && currentBranch === targetBranch) {
-    else if (line.type === 'data') {
+    else if (line.type === LineType.Data) {
       if (!hasStarted) {
         hasStarted = true;
         initBalloonHeader();
@@ -792,9 +878,9 @@ function getCourse(tjaHeaders, lines) {
   }
 
   for (const bt of [
-    'N',
-    'E',
-    'M',
+    BranchType.N,
+    BranchType.E,
+    BranchType.M,
   ]) {
     if (rollStates.roll[bt] !== null) {
       // TODO: warn unended roll
@@ -814,7 +900,7 @@ function getCourse(tjaHeaders, lines) {
 
     if (!firstBpmEventFound) {
       measures[0].events.unshift({
-        name: 'bpm',
+        name: EventType.Bpm,
         position: 0,
         value: tjaHeaders.bpm,
       });
@@ -846,9 +932,9 @@ function getCourse(tjaHeaders, lines) {
     // Add Zero
     const lengths = [];
     const branchs = [
-      'N',
-      'E',
-      'M',
+      BranchType.N,
+      BranchType.E,
+      BranchType.M,
     ];
 
     for (const b of branchs) {
@@ -881,7 +967,7 @@ function getCourse(tjaHeaders, lines) {
     const posToScroll = {};
     for (let j = 0; j < measures[i].events.length; j++) {
       const event = measures[i].events[j];
-      if (event.name === 'scroll') {
+      if (event.name === EventType.Scroll) {
         const value = event.value;
         let lastScroll = posToScroll[event.position];
         if (lastScroll === undefined) {
@@ -900,9 +986,9 @@ function getCourse(tjaHeaders, lines) {
           : measures[i].dataBranches) {
           lastScroll.value[bt] = value;
         }
-      } else if (event.name === 'ttBreak') {
+      } else if (event.name === EventType.TtBreak) {
         measures[i].properties.ttBreaks.push(event);
-      } else if (event.name === 'moveLine') {
+      } else if (event.name === EventType.MoveLine) {
         measures[i].properties.moveLines.push(event);
       }
     }
@@ -945,7 +1031,7 @@ function getCourse(tjaHeaders, lines) {
         }
       } else {
         // add blank measure data
-        measure.data['N'] = getNotes(''); // other arguments unused
+        measure.data[BranchType.N] = getNotes(''); // other arguments unused
       }
     }
   }
@@ -1014,11 +1100,11 @@ export function parseTja(tja) {
     startPlayer: 1,
     level: 0,
     balloon: {
-      'N': [],
-      'E': [],
-      'M': [],
-      all: [],
-      type: 0,
+      [BranchType.N]: [],
+      [BranchType.E]: [],
+      [BranchType.M]: [],
+      'all': [],
+      type: BalloonType.All,
     },
     scoreInit: 0,
     scoreDiff: 0,
@@ -1062,7 +1148,10 @@ export function parseTja(tja) {
       continue;
     }
 
-    if (parsed.type === 'header' && parsed.scope === 'global') {
+    if (
+      parsed.type === LineType.Header
+      && parsed.scope === HeaderScope.Global
+    ) {
       switch (parsed.name) {
         case 'TITLE':
           headers.title = parsed.valueRaw; // TODO: emit warning when value !== valueRaw
@@ -1125,14 +1214,17 @@ export function parseTja(tja) {
           }
           break;
       }
-    } else if (parsed.type === 'header' && parsed.scope === 'course') {
+    } else if (
+      parsed.type === LineType.Header
+      && parsed.scope === HeaderScope.Course
+    ) {
       if ((parsed.name === 'COURSE' || parsed.name === 'STYLE') && hasStarted) {
         // TODO: emit missing-#END warning
         pushCourse();
         hasStarted = false;
       }
       courseLines.push(parsed);
-    } else if (parsed.type === 'command') {
+    } else if (parsed.type === LineType.Command) {
       if (parsed.name === 'START') {
         hasStarted = true;
       }
@@ -1141,7 +1233,7 @@ export function parseTja(tja) {
       if (parsed.name === 'END') {
         pushCourse();
       }
-    } else if (parsed.type === 'data') {
+    } else if (parsed.type === LineType.Data) {
       if (!hasStarted) {
         if (!parsed.data.match(/^[0-9]/)) {
           // likely an incomplete header
@@ -1192,9 +1284,15 @@ export function getCourseLines(tja, chart, courseId) {
       continue;
     }
 
-    if (parsed.type === 'header' && parsed.scope === 'global') {
+    if (
+      parsed.type === LineType.Header
+      && parsed.scope === HeaderScope.Global
+    ) {
       result.push(line);
-    } else if (parsed.type === 'header' && parsed.scope === 'course') {
+    } else if (
+      parsed.type === LineType.Header
+      && parsed.scope === HeaderScope.Course
+    ) {
       if (parsed.name === 'COURSE') {
         const value = parseCourseValue(parsed.value);
         if (value !== null) {
@@ -1215,11 +1313,11 @@ export function getCourseLines(tja, chart, courseId) {
       if (writeHeader) {
         result.push(line);
       }
-    } else if (parsed.type === 'command') {
+    } else if (parsed.type === LineType.Command) {
       if (writeData) {
         result.push(line);
       }
-    } else if (parsed.type === 'data' && writeData) {
+    } else if (parsed.type === LineType.Data && writeData) {
       result.push(line);
     }
   }
@@ -1229,9 +1327,9 @@ export function getCourseLines(tja, chart, courseId) {
 
 export function getEnabledBranch(chart, courseId) {
   const branchTypes = [
-    'N',
-    'E',
-    'M',
+    BranchType.N,
+    BranchType.E,
+    BranchType.M,
   ];
   const result = [];
   const course = chart.courses[courseId];

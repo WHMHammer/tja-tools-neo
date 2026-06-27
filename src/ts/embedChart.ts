@@ -3,6 +3,13 @@
 import { Buffer } from 'buffer';
 import pako from 'pako';
 
+enum PngChunkType {
+  Ihdr = 'IHDR',
+  Idat = 'IDAT',
+  Iend = 'IEND',
+  DsCr = 'dsCr',
+}
+
 function readPngChunksFromDataUrl(dataUrl) {
   const base64Data = dataUrl.split(',')[1];
 
@@ -125,7 +132,12 @@ function createPngDataUrl(chunks) {
 
 export function embedText(data, text) {
   let chunks = readPngChunksFromDataUrl(data);
-  chunks = insertChunk(chunks, 1, 'dsCr', Buffer.from(text, 'utf16le'));
+  chunks = insertChunk(
+    chunks,
+    1,
+    PngChunkType.DsCr,
+    Buffer.from(text, 'utf16le'),
+  );
   return createPngDataUrl(chunks);
 }
 
@@ -155,11 +167,11 @@ function createIhdrChunk(width, height) {
 
   return {
     length: 13,
-    type: 'IHDR',
+    type: PngChunkType.Ihdr,
     data: chunkData,
     crc: calculateCrc(
       Buffer.concat([
-        Buffer.from('IHDR'),
+        Buffer.from(PngChunkType.Ihdr),
         chunkData,
       ]),
     ),
@@ -186,11 +198,11 @@ function createIdatChunk(imageData, width, height) {
 
   return {
     length: chunkData.length,
-    type: 'IDAT',
+    type: PngChunkType.Idat,
     data: chunkData,
     crc: calculateCrc(
       Buffer.concat([
-        Buffer.from('IDAT'),
+        Buffer.from(PngChunkType.Idat),
         chunkData,
       ]),
     ),
@@ -200,8 +212,8 @@ function createIdatChunk(imageData, width, height) {
 function createIendChunk() {
   return {
     length: 0,
-    type: 'IEND',
+    type: PngChunkType.Iend,
     data: Buffer.alloc(0),
-    crc: calculateCrc(Buffer.from('IEND')),
+    crc: calculateCrc(Buffer.from(PngChunkType.Iend)),
   };
 }

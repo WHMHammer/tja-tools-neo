@@ -8,13 +8,26 @@ import html2canvas from 'html2canvas';
 import iconv from 'iconv-lite';
 import JsZip from 'jszip';
 import $ from 'umbrellajs';
-import { analyseChart, calculateScore, predictScore } from './analyseChart';
+import {
+  analyseChart,
+  calculateScore,
+  GogoFloor,
+  predictScore,
+  ScoreSystem,
+} from './analyseChart';
 import { convertToDonscore } from './donscore';
 import { drawChart, initUsedSprite } from './drawChart';
 import { embedText, optimizePNG } from './embedChart';
 import { loadAllFonts } from './font/font';
-import { difficultyTypeToString, i18n, setLanguage, t } from './i18n';
-import { getCourseLines, getEnabledBranch, parseTja } from './parseTJA';
+import { difficultyTypeToString, i18n, Locale, setLanguage, t } from './i18n';
+import {
+  BranchType,
+  EventType,
+  getCourseLines,
+  getEnabledBranch,
+  NoteType,
+  parseTja,
+} from './parseTJA';
 
 import '../css/style.scss';
 import '../css/font/Pixel-3x5.css';
@@ -39,14 +52,37 @@ const $rendaHead = $('.renda-head');
 const $previewImg = document.createElement('img');
 let $previewCanvas = null;
 
-let selectedLocale = 'en';
+enum CalcMode {
+  FromFile = 'fromFile',
+  Predict = 'predict',
+}
+enum PageType {
+  Preview = 'preview',
+  Statistics = 'statistics',
+}
+enum RadioGroup {
+  ScoreSystem = 'scoreSystem',
+  GogoFloor = 'gogoFloor',
+  CalcMode = 'calcMode',
+}
+enum Encoding {
+  Utf8 = 'UTF-8',
+  ShiftJis = 'Shift-JIS',
+  Gb18030 = 'GB18030',
+}
+enum EmbedMode {
+  Donscore = 'Donscore',
+  Tja = 'TJA',
+}
+
+let selectedLocale = Locale.En;
 let tjaParsed = null;
 let selectedDifficulty = '';
-let selectedBranch = 'N';
-let selectedPage = 'preview';
-let selectedScoreSystem = 'CS';
-let selectedGogoFloor = 'AC15';
-let selectedCalcMode = 'fromFile';
+let selectedBranch = BranchType.N;
+let selectedPage = PageType.Preview;
+let selectedScoreSystem = ScoreSystem.Cs;
+let selectedGogoFloor = GogoFloor.Ac15;
+let selectedCalcMode = CalcMode.FromFile;
 
 const downloadNewUniqueId = () => {
   if (tjaParsed === null) {
@@ -104,7 +140,7 @@ const downloadStatisticsAsImage = async () => {
 
 function embedChartNotation() {
   const chartImg = $previewImg.dataset.chartImg;
-  if ($previewImg.dataset.embedMode === 'Donscore') {
+  if ($previewImg.dataset.embedMode === EmbedMode.Donscore) {
     $previewImg.src = embedText(
       chartImg,
       convertToDonscore(tjaParsed, selectedDifficulty),
@@ -132,10 +168,12 @@ const downloadPreviewImage = async () => {
     return;
   }
   if (
-    ($previewImg.dataset.embedMode === 'Donscore')
+    ($previewImg.dataset.embedMode === EmbedMode.Donscore)
     !== $embedDonscore.checked
   ) {
-    $previewImg.dataset.embedMode = $embedDonscore.checked ? 'Donscore' : 'TJA';
+    $previewImg.dataset.embedMode = $embedDonscore.checked
+      ? EmbedMode.Donscore
+      : EmbedMode.Tja;
     displayErrors(`Re-embedding ${$previewImg.dataset.embedMode} notation...`);
     await new Promise((resolve) => setTimeout(resolve, 0)); // update ui
 
@@ -186,13 +224,13 @@ function updateUi() {
   $('.area-pages .page').addClass('is-hidden');
   $(`.area-pages .page-${selectedPage}`).removeClass('is-hidden');
 
-  if (selectedPage === 'preview' && selectedDifficulty !== '') {
+  if (selectedPage === PageType.Preview && selectedDifficulty !== '') {
     showPreview();
   } else {
     hidePreview();
   }
 
-  if (selectedPage === 'statistics') {
+  if (selectedPage === PageType.Statistics) {
     showStatistics();
   }
 
@@ -235,11 +273,11 @@ function loadTjaFromBuffer(arrayBuffer) {
   let encoding;
   $('.charset-auto-detected').text('');
   if ($charsetUtf8.checked) {
-    encoding = 'UTF-8';
+    encoding = Encoding.Utf8;
   } else if ($charsetShiftjis.checked) {
-    encoding = 'Shift-JIS';
+    encoding = Encoding.ShiftJis;
   } else if ($charsetGb18030.checked) {
-    encoding = 'GB18030';
+    encoding = Encoding.Gb18030;
   } else {
     encoding = chardet.detect(buffer);
     $('.charset-auto-detected').text(`: ${encoding}`);
@@ -294,7 +332,9 @@ async function showPreview() {
     $canvas.id = 'tja-preview';
     $('.page-preview').append($canvas);
 
-    $previewImg.dataset.embedMode = $embedDonscore.checked ? 'Donscore' : 'TJA';
+    $previewImg.dataset.embedMode = $embedDonscore.checked
+      ? EmbedMode.Donscore
+      : EmbedMode.Tja;
     displayErrors(`Embedding ${$previewImg.dataset.embedMode} notation...`);
     await new Promise((resolve) => setTimeout(resolve, 0)); // update ui
 
@@ -387,7 +427,7 @@ function buildStatisticsPage(data) {
 
   const course = tjaParsed.courses[selectedDifficulty];
   let { scoreInit, scoreDiff, scoreShin } = course.headers;
-  if (selectedCalcMode === 'predict') {
+  if (selectedCalcMode === CalcMode.Predict) {
     const predicted = predictScore(
       stats,
       course,
@@ -416,28 +456,28 @@ function buildStatisticsPage(data) {
     scoreInit,
     scoreDiff,
     selectedGogoFloor,
-    'AC15',
+    ScoreSystem.Ac15,
     false,
   )[0];
   let statPotential2;
-  if (selectedScoreSystem === 'CS') {
+  if (selectedScoreSystem === ScoreSystem.Cs) {
     statPotential2 = calculateScore(
       stats,
       course,
       scoreShinOrInit,
       0,
       selectedGogoFloor,
-      'AC15',
+      ScoreSystem.Ac15,
       true,
     )[0];
-  } else if (selectedScoreSystem === 'AC16Old') {
+  } else if (selectedScoreSystem === ScoreSystem.Ac16Old) {
     statPotential2 = calculateScore(
       stats,
       course,
       scoreShinOrInit,
       0,
       selectedGogoFloor,
-      'AC16',
+      ScoreSystem.Ac16,
       true,
     )[0];
   }
@@ -457,7 +497,7 @@ function buildStatisticsPage(data) {
   let firstBpm = true;
   for (const measure of course.measures) {
     for (const event of measure.events) {
-      if (event.name === 'bpm') {
+      if (event.name === EventType.Bpm) {
         const curBpm = Number.parseFloat(event.value);
 
         if (firstBpm) {
@@ -537,8 +577,8 @@ function buildStatisticsPage(data) {
     stats.balloons
       .map((b) =>
         (b[3] ? markInGogo : markNone)(
-          (b[2] === 'balloonEx' ? markEx : markNone)(
-            `${b[1]}${strHits} / ${b[0].toFixed(3)}${strSec} = ${(b[1] / b[0]).toFixed(3)} ${strHps}${b[2] === 'fuse' ? ' [💣]' : ''}`,
+          (b[2] === NoteType.BalloonEx ? markEx : markNone)(
+            `${b[1]}${strHits} / ${b[0].toFixed(3)}${strSec} = ${(b[1] / b[0]).toFixed(3)} ${strHps}${b[2] === NoteType.Fuse ? ' [💣]' : ''}`,
           ),
         ),
       )
@@ -766,11 +806,11 @@ $('.controls-score-system .radio').on('click', (evt) => {
   const name = evt.currentTarget.name;
   const value = evt.currentTarget.value;
 
-  if (name === 'scoreSystem') {
+  if (name === RadioGroup.ScoreSystem) {
     selectedScoreSystem = value;
-  } else if (name === 'gogoFloor') {
+  } else if (name === RadioGroup.GogoFloor) {
     selectedGogoFloor = value;
-  } else if (name === 'calcMode') {
+  } else if (name === RadioGroup.CalcMode) {
     selectedCalcMode = value;
   }
 
@@ -778,7 +818,7 @@ $('.controls-score-system .radio').on('click', (evt) => {
 });
 
 $('.btn-download').on('click', () => {
-  if (selectedPage === 'preview') {
+  if (selectedPage === PageType.Preview) {
     downloadPreviewImage();
   } else {
     downloadStatisticsAsImage();
@@ -946,7 +986,7 @@ $cancelZip.on('click', () => {
 //==============================================================================
 
 // 初始化i18n
-i18n.setLanguage('en');
+i18n.setLanguage(Locale.En);
 
 // 监听语言变化事件，更新动态生成的内容
 window.addEventListener('languageChanged', () => {

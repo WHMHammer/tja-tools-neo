@@ -1,6 +1,7 @@
 // @ts-nocheck
 
 import { bsearchLeftmost } from './common';
+import { BranchType, EventType, NoteType } from './parseTJA';
 
 function pulseToTime(events, objects) {
   let bpm = 120;
@@ -16,10 +17,10 @@ function pulseToTime(events, objects) {
     const obj = objects[oidx];
 
     while (event && event.absBeat <= obj.absBeat) {
-      if (event.type === 'delay') {
+      if (event.type === EventType.Delay) {
         passedTime += event.value;
       }
-      if (event.type === 'bpm') {
+      if (event.type === EventType.Bpm) {
         const beat = event.beat - passedBeat;
         const time = (60 / bpm) * beat;
 
@@ -58,31 +59,31 @@ function convertToTimed(course, branchType) {
     let selData = '';
 
     switch (branchType) {
-      case 'N':
-        if (measure.data['N'] != null) {
-          selData = measure.data['N'];
-        } else if (measure.data['E'] != null) {
-          selData = measure.data['E'];
-        } else if (measure.data['M'] != null) {
-          selData = measure.data['M'];
+      case BranchType.N:
+        if (measure.data[BranchType.N] != null) {
+          selData = measure.data[BranchType.N];
+        } else if (measure.data[BranchType.E] != null) {
+          selData = measure.data[BranchType.E];
+        } else if (measure.data[BranchType.M] != null) {
+          selData = measure.data[BranchType.M];
         }
         break;
-      case 'E':
-        if (measure.data['E'] != null) {
-          selData = measure.data['E'];
-        } else if (measure.data['N'] != null) {
-          selData = measure.data['N'];
-        } else if (measure.data['M'] != null) {
-          selData = measure.data['M'];
+      case BranchType.E:
+        if (measure.data[BranchType.E] != null) {
+          selData = measure.data[BranchType.E];
+        } else if (measure.data[BranchType.N] != null) {
+          selData = measure.data[BranchType.N];
+        } else if (measure.data[BranchType.M] != null) {
+          selData = measure.data[BranchType.M];
         }
         break;
-      case 'M':
-        if (measure.data['M'] != null) {
-          selData = measure.data['M'];
-        } else if (measure.data['E'] != null) {
-          selData = measure.data['E'];
-        } else if (measure.data['N'] != null) {
-          selData = measure.data['N'];
+      case BranchType.M:
+        if (measure.data[BranchType.M] != null) {
+          selData = measure.data[BranchType.M];
+        } else if (measure.data[BranchType.E] != null) {
+          selData = measure.data[BranchType.E];
+        } else if (measure.data[BranchType.N] != null) {
+          selData = measure.data[BranchType.N];
         }
         break;
     }
@@ -98,10 +99,10 @@ function convertToTimed(course, branchType) {
       const eBeat = (length / measure.nDivisions) * event.position;
 
       switch (event.name) {
-        case 'bpm':
-        case 'delay':
-        case 'gogoStart':
-        case 'gogoEnd':
+        case EventType.Bpm:
+        case EventType.Delay:
+        case EventType.GogoStart:
+        case EventType.GogoEnd:
           events.push({
             type: event.name,
             value: event.value,
@@ -222,11 +223,11 @@ function getStatistics(course) {
   let scPotential = 0;
 
   const typeNote = [
-    'don',
-    'kat',
-    'donBig',
-    'katBig',
-    'kadon',
+    NoteType.Don,
+    NoteType.Kat,
+    NoteType.DonBig,
+    NoteType.KatBig,
+    NoteType.Kadon,
   ];
 
   for (let i = 0; i < course.notes.length; i++) {
@@ -234,9 +235,9 @@ function getStatistics(course) {
 
     if (scCurEvent && scCurEvent.beat <= note.beat) {
       do {
-        if (scCurEvent.type === 'gogoStart') {
+        if (scCurEvent.type === EventType.GogoStart) {
           scGogo = true;
-        } else if (scCurEvent.type === 'gogoEnd') {
+        } else if (scCurEvent.type === EventType.GogoEnd) {
           scGogo = false;
         }
 
@@ -246,7 +247,8 @@ function getStatistics(course) {
     }
 
     const v1 = typeNote.indexOf(note.type);
-    const isBig = note.type.endsWith('Big');
+    const isBig =
+      note.type === NoteType.DonBig || note.type === NoteType.KatBig;
     if (v1 !== -1) {
       if (i === 0) {
         start = note.time;
@@ -288,7 +290,7 @@ function getStatistics(course) {
       continue;
     }
 
-    if (note.type === 'renda' || note.type === 'rendaBig') {
+    if (note.type === NoteType.Renda || note.type === NoteType.RendaBig) {
       if (note.end !== undefined) {
         const noteEnd =
           course.notes[course.midxToNoteIdx[note.end.midx] + note.end.didx];
@@ -311,9 +313,9 @@ function getStatistics(course) {
         });
       }
     } else if (
-      note.type === 'balloon'
-      || note.type === 'balloonEx'
-      || note.type === 'fuse'
+      note.type === NoteType.Balloon
+      || note.type === NoteType.BalloonEx
+      || note.type === NoteType.Fuse
     ) {
       if (note.end !== undefined) {
         const noteEnd =
@@ -332,11 +334,11 @@ function getStatistics(course) {
           scBalloonPop[Number(scGogo)] += 1;
         }
       }
-    } else if (note.type === 'end' || note.type === 'endForced') {
+    } else if (note.type === NoteType.End || note.type === NoteType.EndForced) {
       // do nothing
-    } else if (note.type === 'adlib') {
+    } else if (note.type === NoteType.Adlib) {
       adlibs++;
-    } else if (note.type === 'mine') {
+    } else if (note.type === NoteType.Mine) {
       mines++;
     }
   }
@@ -375,11 +377,11 @@ function getGraph(course) {
   const timeframe = Math.max(1, length / dataCount);
 
   const typeNote = [
-    'don',
-    'kat',
-    'donBig',
-    'katBig',
-    'kadon',
+    NoteType.Don,
+    NoteType.Kat,
+    NoteType.DonBig,
+    NoteType.KatBig,
+    NoteType.Kadon,
   ];
 
   for (const note of course.notes) {
@@ -399,11 +401,11 @@ function getGraph(course) {
         };
       }
 
-      if (note.type === 'don' || note.type === 'donBig') {
+      if (note.type === NoteType.Don || note.type === NoteType.DonBig) {
         datum.don += 1;
-      } else if (note.type === 'kat' || note.type === 'katBig') {
+      } else if (note.type === NoteType.Kat || note.type === NoteType.KatBig) {
         datum.kat += 1;
-      } else if (note.type === 'kadon') {
+      } else if (note.type === NoteType.Kadon) {
         datum.kadon += 1;
       }
     }
@@ -436,6 +438,18 @@ export function analyseChart(chart, courseId, branchType) {
     statistics,
     graph,
   };
+}
+
+export enum ScoreSystem {
+  Ac15 = 'AC15',
+  Ac16 = 'AC16',
+  Cs = 'CS',
+  Ac16Old = 'AC16Old',
+}
+
+export enum GogoFloor {
+  Ac15 = 'AC15',
+  Rc = 'RC',
 }
 
 export function calculateScore(
@@ -480,8 +494,8 @@ export function calculateScore(
   ];
 
   switch (scoreSystem + shinuchi) {
-    case 'AC15' + false:
-    case 'AC16' + false: {
+    case ScoreSystem.Ac15 + false:
+    case ScoreSystem.Ac16 + false: {
       const noteScores = multipliers.map((m) =>
         drop1(scoreInit + scoreDiff * m),
       );
@@ -492,7 +506,7 @@ export function calculateScore(
 
       let noteGogoScores;
       let noteGogoScoresBig;
-      if (gogoFloor === 'AC15') {
+      if (gogoFloor === GogoFloor.Ac15) {
         noteGogoScores = noteScores.map((s) => drop1(s * 1.2));
         noteGogoScoresBig = noteScores.map((s) => drop1(s * 1.2) * 2);
       } else {
@@ -532,7 +546,7 @@ export function calculateScore(
         scoreRoll,
       ];
     }
-    case 'AC15' + true: {
+    case ScoreSystem.Ac15 + true: {
       const scoreBasic =
         (stats.totalCombo + (stats.notes[2] + stats.notes[3])) * scoreInit
         + stats.score.balloon[0] * 300
@@ -551,7 +565,7 @@ export function calculateScore(
         scoreRoll,
       ];
     }
-    case 'AC16' + true: {
+    case ScoreSystem.Ac16 + true: {
       const scoreBasic =
         stats.totalCombo * scoreInit
         + stats.score.balloon[0] * 100
@@ -640,7 +654,7 @@ export function predictScore(stats, course, gogoFloor, scoreSystem) {
           scoreInit,
           scoreDiff,
           gogoFloor,
-          'AC15',
+          ScoreSystem.Ac15,
           false,
         );
         const scoreTemp = result[0] + result[1];
@@ -665,7 +679,7 @@ export function predictScore(stats, course, gogoFloor, scoreSystem) {
           scoreShin,
           0,
           gogoFloor,
-          'AC15',
+          ScoreSystem.Ac15,
           true,
         );
         const scoreTemp = result[0] + result[1];
@@ -688,7 +702,7 @@ export function predictScore(stats, course, gogoFloor, scoreSystem) {
           scoreNiji,
           0,
           gogoFloor,
-          'AC16',
+          ScoreSystem.Ac16,
           true,
         );
         const scoreTemp = result[0] + result[1];
@@ -700,14 +714,14 @@ export function predictScore(stats, course, gogoFloor, scoreSystem) {
     );
 
   //Shiage
-  if (scoreSystem === 'CS') {
+  if (scoreSystem === ScoreSystem.Cs) {
     return [
       scoreInit,
       scoreDiff,
       scoreShin,
     ];
   }
-  // if (scoreSystem === 'AC16Old')
+  // if (scoreSystem === ScoreSystem.Ac16Old)
   return [
     scoreInit,
     scoreDiff,
