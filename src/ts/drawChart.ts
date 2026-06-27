@@ -25,7 +25,7 @@ import {
 // Drawing config and helpers
 
 const CHART_PADDING_TOP = {
-  MIN: 62,
+  // MIN: 62,
   current: 62,
 };
 const CHART_PADDING_BOTTOM = -14;
@@ -1157,6 +1157,7 @@ export function drawChart(chart, courseId) {
         if (!measure.dataBranches.includes(bt)) {
           continue;
         }
+        // biome-ignore lint/style/useNamingConvention: y is a part by itself
         const rowYDelta = measure.dataBranches.indexOf(bt) * 24;
 
         for (let didx = measure.data[bt].length; didx-- > 0; ) {

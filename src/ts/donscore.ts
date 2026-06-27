@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { addZero, arrayLCM, lcm } from './common';
+import { addZero, arrayLcm, lcm } from './common';
 import { compareArray } from './drawChart';
 import {
   BranchType,
@@ -161,7 +161,7 @@ export function convertToDonscore(chart, courseId) {
         lengths.push(newData[i][bt].nDivisions);
       }
     }
-    const fixedMax = arrayLCM(lengths);
+    const fixedMax = arrayLcm(lengths);
 
     for (const event of newEvent[i]) {
       const rate = fixedMax / measure.nDivisions;

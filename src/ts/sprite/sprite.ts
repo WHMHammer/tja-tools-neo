@@ -1,4 +1,5 @@
 // @ts-nocheck
+// biome-ignore-all lint/style/useNamingConvention: sprite keys
 
 export const SPRITES = {
   'notes': {

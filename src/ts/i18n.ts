@@ -250,7 +250,7 @@ class I18n {
   setLanguage(lang) {
     if (this.translations[lang]) {
       this.currentLanguage = lang;
-      this.updateDOM();
+      this.updateDom();
     }
   }
 
@@ -261,7 +261,7 @@ class I18n {
   }
 
   // 更新DOM中所有带有data-i18n属性的元素
-  updateDOM() {
+  updateDom() {
     // 更新所有带有 data-i18n 属性的元素
     document.querySelectorAll('[data-i18n]').forEach((element) => {
       const key = element.getAttribute('data-i18n');

@@ -1,6 +1,6 @@
 // @ts-nocheck
 
-import { addZero, arrayLCM } from './common';
+import { addZero, arrayLcm } from './common';
 
 export enum CourseDifficulty {
   Easy = 0,
@@ -488,9 +488,9 @@ function getCourse(tjaHeaders, lines) {
       'all': 0,
     },
     roll: {
-      N: null,
-      E: null,
-      M: null,
+      [BranchType.N]: null,
+      [BranchType.E]: null,
+      [BranchType.M]: null,
     },
   };
 
@@ -511,9 +511,9 @@ function getCourse(tjaHeaders, lines) {
         lengthNotes: null,
         properties: {},
         data: {
-          N: null,
-          E: null,
-          M: null,
+          [BranchType.N]: null,
+          [BranchType.E]: null,
+          [BranchType.M]: null,
         },
         events: [],
         nDivisions: 1,
@@ -944,7 +944,7 @@ function getCourse(tjaHeaders, lines) {
       }
     }
 
-    const fixedMax = arrayLCM(lengths);
+    const fixedMax = arrayLcm(lengths);
     measures[i].nDivisions = fixedMax;
 
     for (const event of measures[i].events) {

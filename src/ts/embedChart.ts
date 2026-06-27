@@ -141,7 +141,7 @@ export function embedText(data, text) {
   return createPngDataUrl(chunks);
 }
 
-export function optimizePNG(canvas) {
+export function optimizePng(canvas) {
   const ctx = canvas.getContext('2d');
   const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   const { data, width, height } = imageData;

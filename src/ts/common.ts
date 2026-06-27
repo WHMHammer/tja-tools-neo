@@ -8,7 +8,7 @@ export function lcm(a, b) {
   return (a * b) / gcd(a, b);
 }
 
-export function arrayLCM(arr) {
+export function arrayLcm(arr) {
   let result = arr[0];
   for (let i = 1; i < arr.length; i++) {
     result = lcm(result, arr[i]);

@@ -17,7 +17,7 @@ import {
 } from './analyseChart';
 import { convertToDonscore } from './donscore';
 import { drawChart, initUsedSprite } from './drawChart';
-import { embedText, optimizePNG } from './embedChart';
+import { embedText, optimizePng } from './embedChart';
 import { loadAllFonts } from './font/font';
 import { difficultyTypeToString, i18n, Locale, setLanguage, t } from './i18n';
 import {
@@ -338,7 +338,7 @@ async function showPreview() {
     displayErrors(`Embedding ${$previewImg.dataset.embedMode} notation...`);
     await new Promise((resolve) => setTimeout(resolve, 0)); // update ui
 
-    $previewImg.dataset.chartImg = optimizePNG($canvas);
+    $previewImg.dataset.chartImg = optimizePng($canvas);
     embedChartNotation();
   } catch (e) {
     console.error(e);
