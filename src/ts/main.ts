@@ -825,30 +825,16 @@ $('.btn-download').on('click', () => {
   }
 });
 
-$('.download-donscore .button').on('click', async () => {
+$('.download-donscore .button').on('click', () => {
   if (selectedDifficulty === '') {
     return;
   }
 
-  const fh = await window.showSaveFilePicker({
-    types: [
-      {
-        description: 'Text File',
-        accept: {
-          'text/plain': [
-            '.txt',
-          ],
-        },
-      },
-    ],
-  });
-
-  const writable = await fh.createWritable();
-  const writeText = convertToDonscore(tjaParsed, selectedDifficulty);
-
-  const sjisText = iconv.encode(writeText, 'shift_jis');
-  await writable.write(sjisText);
-  await writable.close();
+  downloadjs(
+    iconv.encode(convertToDonscore(tjaParsed, selectedDifficulty), 'shift_jis'),
+    'Donscore.txt',
+    'text/plain;charset=shift_jis',
+  );
 });
 
 window.onload = async () => {
